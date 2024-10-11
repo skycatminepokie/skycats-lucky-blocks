@@ -1,0 +1,43 @@
+{
+	"schemaVersion": 1,
+	"id": "skycats-lucky-blocks",
+	"version": "${version}",
+	"name": "Skycat's Lucky Blocks",
+	"description": "Good ol' lucky blocks",
+	"authors": [
+		"skycatminepokie"
+	],
+	"contact": {
+		"homepage": "https://github.com/skycatminepokie",
+		"sources": "https://github.com/skycatminepokie/skycats-lucky-blocks"
+	},
+	"license": "MIT",
+	"icon": "assets/skycats-lucky-blocks/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"com.skycatdev.skycatsluckyblocks.SkycatsLuckyBlocks"
+		],
+		"client": [
+			"com.skycatdev.skycatsluckyblocks.SkycatsLuckyBlocksClient"
+		],
+		"fabric-datagen": [
+			"com.skycatdev.skycatsluckyblocks.SkycatsLuckyBlocksDataGenerator"
+		]
+	},
+	"mixins": [
+		"skycats-lucky-blocks.mixins.json",
+		{
+			"config": "skycats-lucky-blocks.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.16.7",
+		"minecraft": "~1.21.1",
+		"java": ">=21",
+		"fabric-api": "*"
+	},
+	"suggests": {
+	}
+}
