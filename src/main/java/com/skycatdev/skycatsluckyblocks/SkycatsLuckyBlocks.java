@@ -1,7 +1,7 @@
 package com.skycatdev.skycatsluckyblocks;
 
+import com.skycatdev.skycatsluckyblocks.impl.LuckyBlocks;
 import net.fabricmc.api.ModInitializer;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,6 +12,6 @@ public class SkycatsLuckyBlocks implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-
+		LuckyBlocks.init();
 	}
 }
