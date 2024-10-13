@@ -13,5 +13,6 @@ public class SkycatsLuckyBlocks implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		LuckyBlocks.init();
+		LuckyEffects.init();
 	}
 }

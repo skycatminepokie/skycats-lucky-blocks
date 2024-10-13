@@ -22,7 +22,7 @@
 			"com.skycatdev.skycatsluckyblocks.SkycatsLuckyBlocksClient"
 		],
 		"fabric-datagen": [
-			"com.skycatdev.skycatsluckyblocks.SkycatsLuckyBlocksDataGenerator"
+			"com.skycatdev.skycatsluckyblocks.datagen.SkycatsLuckyBlocksDataGenerator"
 		]
 	},
 	"mixins": [

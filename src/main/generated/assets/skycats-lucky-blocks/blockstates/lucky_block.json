@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "skycats-lucky-blocks:block/lucky_block"
+    }
+  }
+}
