@@ -1,19 +1,24 @@
 package com.skycatdev.skycatsluckyblocks.impl;
 
+import com.skycatdev.skycatsluckyblocks.LuckyEffectPools;
 import com.skycatdev.skycatsluckyblocks.SkycatsLuckyBlocks;
+import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
+import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.util.Identifier;
 
 public class LuckyBlocks {
+    public static final SimpleLuckyBlock LUCKY_BLOCK = register(new SimpleLuckyBlock(AbstractBlock.Settings.create().sounds(BlockSoundGroup.GLASS).solid(), LuckyEffectPools.DEFAULT), "lucky_block", true);
+
     public static void init() {
 
     }
 
-    public static Block register(Block block, String name, boolean shouldRegisterItem) {
+    public static <T extends Block> T register(T block, String name, boolean shouldRegisterItem) {
         Identifier id = Identifier.of(SkycatsLuckyBlocks.MOD_ID, name);
 
         if (shouldRegisterItem) {
