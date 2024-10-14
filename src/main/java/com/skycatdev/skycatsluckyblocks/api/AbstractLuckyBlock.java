@@ -11,6 +11,7 @@ import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
 
 public abstract class AbstractLuckyBlock extends Block {
+    public static final int MAX_ATTEMPTS = 10;
     public AbstractLuckyBlock(Settings settings) {
         super(settings);
     }
@@ -22,7 +23,11 @@ public abstract class AbstractLuckyBlock extends Block {
                 Random random = player.getRandom();
                 LuckyEffect effect = getEffectPool().getRandom(random);
                 if (effect != null) {
-                    effect.execute(serverWorld, pos, state, serverPlayer);
+                    // This is just a compact way of trying effects over and over again if they fail.
+                    int attempts = 0;
+                    while (!effect.execute(serverWorld, pos, state, serverPlayer) && attempts++ < MAX_ATTEMPTS) {
+                        SkycatsLuckyBlocks.LOGGER.warn("Failed a LuckyEffect, trying again.");
+                    }
                 } else {
                     SkycatsLuckyBlocks.LOGGER.warn("Effect pool for {} was empty, no effect will be executed.", getName().getString());
                 }

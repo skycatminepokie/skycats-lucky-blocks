@@ -21,8 +21,8 @@ public class SimpleLuckyEffect implements LuckyEffect {
     }
 
     @Override
-    public void execute(ServerWorld world, BlockPos pos, BlockState state, ServerPlayerEntity player) {
-        function.execute(world, pos, state, player);
+    public boolean execute(ServerWorld world, BlockPos pos, BlockState state, ServerPlayerEntity player) {
+        return function.execute(world, pos, state, player);
     }
 
     @Override
