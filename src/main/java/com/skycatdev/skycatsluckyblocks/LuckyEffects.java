@@ -65,14 +65,14 @@ public class LuckyEffects {
     })
             .addPool(LuckyEffectPools.WITHER, 1)
             .build();
-    public static final SimpleLuckyEffect DROP_DIAMOND = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "drop_diamond"), ((world, pos, state, player) -> {
+    public static final SimpleLuckyEffect DROP_DIAMOND = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "drop_diamond"), (world, pos, state, player) -> {
         ItemStack diamond = new ItemStack(Items.DIAMOND);
         diamond.set(DataComponentTypes.CUSTOM_NAME, Text.of("Not a diamund"));
         return world.spawnEntity(new ItemEntity(world, pos.getX(), pos.getY(), pos.getZ(), diamond));
-    }))
+    })
             .addPool(LuckyEffectPools.DEFAULT, 1)
             .build();
-    public static final SimpleLuckyEffect DROP_KB_STICK = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID,"drop_kb_stick"), ((world, pos, state, player) -> {
+    public static final SimpleLuckyEffect DROP_KB_STICK = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID,"drop_kb_stick"), (world, pos, state, player) -> {
         ItemStack kb_stick = new ItemStack(Items.STICK);
         ItemEnchantmentsComponent.Builder builder = new ItemEnchantmentsComponent.Builder(ItemEnchantmentsComponent.DEFAULT);
         Optional<RegistryEntry.Reference<Enchantment>> optKnockback = world.getRegistryManager().get(RegistryKeys.ENCHANTMENT).getEntry(Enchantments.KNOCKBACK);
@@ -84,7 +84,7 @@ public class LuckyEffects {
         kb_stick.set(DataComponentTypes.ENCHANTMENTS,
                 builder.build());
         return world.spawnEntity(new ItemEntity(world, pos.getX(), pos.getY(), pos.getZ(), kb_stick));
-    }))
+    })
             .addPool(LuckyEffectPools.WEAPON, 1)
             .build();
     public static final SimpleLuckyEffect SPAWN_SCALED_MOB = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "spawn_scaled_mob"), LuckyEffects::spawnScaledMob)
