@@ -5,6 +5,7 @@ import com.skycatdev.skycatsluckyblocks.mixin.SaplingGeneratorMixin;
 import net.minecraft.block.SaplingGenerator;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.ItemEnchantmentsComponent;
+import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ItemEntity;
@@ -14,6 +15,7 @@ import net.minecraft.entity.passive.IronGolemEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvents;
@@ -27,6 +29,8 @@ import net.minecraft.util.math.ChunkSectionPos;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
 import net.minecraft.world.gen.structure.Structure;
+
+import java.util.Optional;
 
 import static com.skycatdev.skycatsluckyblocks.SkycatsLuckyBlocks.LOGGER;
 import static com.skycatdev.skycatsluckyblocks.SkycatsLuckyBlocks.MOD_ID;
@@ -117,7 +121,12 @@ public class LuckyEffects {
     public static final SimpleLuckyEffect DROP_KB_STICK = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID,"drop_kb_stick"), ((world, pos, state, player) -> {
         ItemStack kb_stick = new ItemStack(Items.STICK);
         ItemEnchantmentsComponent.Builder builder = new ItemEnchantmentsComponent.Builder(ItemEnchantmentsComponent.DEFAULT);
-        builder.add(world.getRegistryManager().get(RegistryKeys.ENCHANTMENT).getEntry(Enchantments.KNOCKBACK).get(), 200);
+        Optional<RegistryEntry.Reference<Enchantment>> optKnockback = world.getRegistryManager().get(RegistryKeys.ENCHANTMENT).getEntry(Enchantments.KNOCKBACK);
+        if (optKnockback.isEmpty()) {
+            LOGGER.warn("Knockback enchantment didn't exist? Skipping DROP_KB_STICK.");
+            return false;
+        }
+        builder.add(optKnockback.get(), 4);
         kb_stick.set(DataComponentTypes.ENCHANTMENTS,
                 builder.build());
         return world.spawnEntity(new ItemEntity(world, pos.getX(), pos.getY(), pos.getZ(), kb_stick));
