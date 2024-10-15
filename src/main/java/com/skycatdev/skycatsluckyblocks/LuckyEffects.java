@@ -21,7 +21,9 @@ import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.structure.StructurePlacementData;
 import net.minecraft.structure.StructureStart;
+import net.minecraft.structure.StructureTemplate;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockBox;
@@ -90,6 +92,20 @@ public class LuckyEffects {
     public static final SimpleLuckyEffect SPAWN_SCALED_MOB = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "spawn_scaled_mob"), LuckyEffects::spawnScaledMob)
             .addPool(LuckyEffectPools.DEFAULT, 1)
             .build();
+    public static final SimpleLuckyEffect PLACE_CAGE = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "place_cage"), LuckyEffects::placeCage)
+            .addPool(LuckyEffectPools.DEFAULT, 1)
+            .build();
+
+    private static boolean placeCage(ServerWorld world, BlockPos pos, BlockState state, ServerPlayerEntity player) {
+        Optional<StructureTemplate> optTemplate = world.getStructureTemplateManager().getTemplate(Identifier.of(MOD_ID, "cage"));
+        if (optTemplate.isEmpty()) {
+            LOGGER.warn("Couldn't find the cage structure. Skipping.");
+            return false;
+        }
+        BlockPos structPos = player.getBlockPos().west().north();
+        optTemplate.get().place(world, structPos, structPos, new StructurePlacementData(), player.getRandom(), 2);
+        return true;
+    }
 
     private static boolean spawnScaledMob(ServerWorld world, BlockPos pos, BlockState state, ServerPlayerEntity player) {
         EntityType<?> entityType = Utils.getRandomFromTag(Registries.ENTITY_TYPE, SkycatsLuckyBlocksTags.SPAWN_SCALED_MOB_MOBS, player.getRandom());
