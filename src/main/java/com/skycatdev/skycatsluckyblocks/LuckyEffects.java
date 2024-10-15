@@ -43,10 +43,7 @@ public class LuckyEffects {
     })
             .addPool(LuckyEffectPools.DEFAULT, 0.1)
             .build();
-    public static final SimpleLuckyEffect SPAWN_IRON_GOLEM = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "spawn_iron_golem"), (world, pos, state, player) -> spawnIronGolem(world, pos, player, false))
-            .addPool(LuckyEffectPools.DEFAULT, 1)
-            .build();
-    public static final SimpleLuckyEffect SPAWN_ANGRY_IRON_GOLEM = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "spawn_angry_iron_golem"), (world, pos, state, player) -> spawnIronGolem(world, pos, player, true))
+    public static final SimpleLuckyEffect SPAWN_IRON_GOLEM = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "spawn_iron_golem"), (world, pos, state, player) -> spawnIronGolem(world, pos, player, player.getRandom().nextBoolean()))
             .addPool(LuckyEffectPools.DEFAULT, 1)
             .build();
     public static final SimpleLuckyEffect RANDOM_TREE = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "random_tree"), ((world, pos, state, player) -> {
