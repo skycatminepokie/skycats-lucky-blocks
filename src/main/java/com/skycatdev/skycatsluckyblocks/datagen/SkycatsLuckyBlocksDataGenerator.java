@@ -9,5 +9,6 @@ public class SkycatsLuckyBlocksDataGenerator implements DataGeneratorEntrypoint 
         FabricDataGenerator.Pack pack = fabricDataGenerator.createPack();
 		pack.addProvider(SkycatsLuckyBlocksEnglishLangProvider::new);
 		pack.addProvider(SkycatsLuckyBlocksModelProvider::new);
+		pack.addProvider(SkycatsLuckyBlocksEntityTypeTagGenerator::new);
 	}
 }

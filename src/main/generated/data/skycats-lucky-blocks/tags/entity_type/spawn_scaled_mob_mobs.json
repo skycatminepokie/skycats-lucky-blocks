@@ -1,0 +1,14 @@
+{
+  "values": [
+    "minecraft:blaze",
+    "minecraft:creeper",
+    "minecraft:enderman",
+    "minecraft:skeleton",
+    "minecraft:zombie",
+    "minecraft:camel",
+    "minecraft:cat",
+    "minecraft:cow",
+    "minecraft:fox",
+    "minecraft:iron_golem"
+  ]
+}

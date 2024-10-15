@@ -8,13 +8,14 @@ import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.ItemEnchantmentsComponent;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.Enchantments;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.ItemEntity;
-import net.minecraft.entity.SpawnReason;
+import net.minecraft.entity.*;
+import net.minecraft.entity.attribute.EntityAttributeInstance;
+import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.boss.WitherEntity;
 import net.minecraft.entity.passive.IronGolemEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -86,6 +87,72 @@ public class LuckyEffects {
     }))
             .addPool(LuckyEffectPools.WEAPON, 1)
             .build();
+    public static final SimpleLuckyEffect SPAWN_SCALED_MOB = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "spawn_scaled_mob"), LuckyEffects::spawnScaledMob)
+            .addPool(LuckyEffectPools.DEFAULT, 1)
+            .build();
+
+    private static boolean spawnScaledMob(ServerWorld world, BlockPos pos, BlockState state, ServerPlayerEntity player) {
+        EntityType<?> entityType = Utils.getRandomFromTag(Registries.ENTITY_TYPE, SkycatsLuckyBlocksTags.SPAWN_SCALED_MOB_MOBS, player.getRandom());
+        if (entityType == null) {
+            LOGGER.warn("Couldn't get a random mob from SPAWN_SCALED_MOB_MOBS, is it empty?");
+            return false;
+        }
+        Entity entity = entityType.create(world, e -> {
+        }, pos, SpawnReason.COMMAND, true, false);
+        if (entity instanceof LivingEntity livingEntity) {
+            EntityAttributeInstance attribute = livingEntity.getAttributeInstance(EntityAttributes.GENERIC_SCALE);
+            if (attribute == null) {
+                LOGGER.warn("Random mob from SPAWN_SCALED_MOB_MOBS \"{}\" has no scale attribute!", entity.getName().getString());
+                entity.discard();
+                return false;
+            }
+            double scale = new java.util.Random(player.getRandom().nextLong()).nextDouble(0.5, 1.5); // TODO: possibly could be optimized by not creating the random
+            attribute.setBaseValue(scale);
+            giveScaledName(livingEntity, scale);
+            world.spawnNewEntityAndPassengers(livingEntity);
+            return true;
+        } else {
+            LOGGER.warn("Random mob from SPAWN_SCALED_MOB_MOBS \"{}\" was not a LivingEntity and it must be!", entity.getName().getString());
+            entity.discard();
+            return false;
+        }
+    }
+
+    private static void giveScaledName(LivingEntity livingEntity, double scale) {
+        String entityTypeName = livingEntity.getType().getName().getString();
+        if (scale <= 0.6) {
+            livingEntity.setCustomName(Text.of("Smol " + entityTypeName));
+            return;
+        }
+        if (scale <= 0.75) {
+            livingEntity.setCustomName(Text.of("Small " + entityTypeName));
+            return;
+        }
+        if (scale < 0.99) {
+            livingEntity.setCustomName(Text.of("Slightly Small " + entityTypeName));
+            return;
+        }
+        if (scale < 1) {
+            livingEntity.setCustomName(Text.of("Uncomfortably Small " + entityTypeName));
+            return;
+        }
+        if (scale == 1) {
+            livingEntity.setCustomName(Text.of("Incredibly Uncommon Regular-Sized " + entityTypeName));
+            return;
+        }
+        if (scale <= 1.01) {
+            livingEntity.setCustomName(Text.of("Uncomfortably Big " + entityTypeName));
+        }
+        if (scale <= 1.1) {
+            livingEntity.setCustomName(Text.of("Slightly Big " + entityTypeName));
+            return;
+        }
+        if (scale <= 1.4) {
+            livingEntity.setCustomName(Text.of("Big " + entityTypeName));
+            return;
+        }
+        livingEntity.setCustomName(Text.of("Chonky " + entityTypeName));
+    }
 
     private static boolean placeStructure(ServerWorld world, BlockPos pos, BlockState state, ServerPlayerEntity player) {
         // A lot of this comes from PlaceCommand#executePlaceStructure
@@ -109,7 +176,7 @@ public class LuckyEffects {
                 (biome) -> true
         );
         if (!structureStart.hasChildren()) {
-            LOGGER.debug("Couldn't place a structure, the start doesn't have any children to place.");
+            LOGGER.info("Couldn't place a structure, the start doesn't have any children to place.");
             return false;
         }
         BlockBox boundingBox = structureStart.getBoundingBox();
@@ -117,7 +184,7 @@ public class LuckyEffects {
         ChunkPos maxCorner = new ChunkPos(ChunkSectionPos.getSectionCoord(boundingBox.getMaxX()), ChunkSectionPos.getSectionCoord(boundingBox.getMaxZ()));
 
         if (ChunkPos.stream(minCorner, maxCorner).anyMatch(chunk -> !world.canSetBlock(chunk.getStartPos()))) {
-            LOGGER.debug("Couldn't place a structure, not everything was loaded.");
+            LOGGER.info("Couldn't place a structure, not everything was loaded.");
             return false;
         }
 
