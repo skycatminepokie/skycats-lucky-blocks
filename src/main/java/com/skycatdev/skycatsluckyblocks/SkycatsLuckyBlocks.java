@@ -1,7 +1,6 @@
 package com.skycatdev.skycatsluckyblocks;
 
 import com.skycatdev.skycatsluckyblocks.api.AbstractLuckyBlock;
-import com.skycatdev.skycatsluckyblocks.impl.LuckyBlocks;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.minecraft.block.BlockState;

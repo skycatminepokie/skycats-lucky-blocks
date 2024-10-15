@@ -1,6 +1,6 @@
 package com.skycatdev.skycatsluckyblocks.datagen;
 
-import com.skycatdev.skycatsluckyblocks.impl.LuckyBlocks;
+import com.skycatdev.skycatsluckyblocks.LuckyBlocks;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricLanguageProvider;
 import net.minecraft.registry.RegistryWrapper;

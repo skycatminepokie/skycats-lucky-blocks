@@ -1,7 +1,6 @@
-package com.skycatdev.skycatsluckyblocks.impl;
+package com.skycatdev.skycatsluckyblocks;
 
-import com.skycatdev.skycatsluckyblocks.LuckyEffectPools;
-import com.skycatdev.skycatsluckyblocks.SkycatsLuckyBlocks;
+import com.skycatdev.skycatsluckyblocks.impl.SimpleLuckyBlock;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.item.BlockItem;
