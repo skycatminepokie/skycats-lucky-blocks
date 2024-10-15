@@ -44,6 +44,11 @@ public abstract class AbstractLuckyBlock extends Block implements PlayerBlockBre
                     int attempts = 0;
                     while (!effect.execute(serverWorld, pos, state, serverPlayer) && attempts++ < MAX_ATTEMPTS) {
                         SkycatsLuckyBlocks.LOGGER.info("Failed a LuckyEffect, trying again."); // TODO: Only dev env
+                        effect = getEffectPool().getRandom(random);
+                        if (effect == null) {
+                            SkycatsLuckyBlocks.LOGGER.warn("Effect pool for {} was empty, and it wasn't before. You've messed something up royally.", getName().getString());
+                            return;
+                        }
                     }
                 } else {
                     SkycatsLuckyBlocks.LOGGER.warn("Effect pool for {} was empty, no effect will be executed.", getName().getString());
