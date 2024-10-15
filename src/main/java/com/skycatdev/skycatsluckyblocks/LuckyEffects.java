@@ -2,6 +2,7 @@ package com.skycatdev.skycatsluckyblocks;
 
 import com.skycatdev.skycatsluckyblocks.impl.SimpleLuckyEffect;
 import com.skycatdev.skycatsluckyblocks.mixin.SaplingGeneratorMixin;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.SaplingGenerator;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.ItemEnchantmentsComponent;
@@ -56,7 +57,40 @@ public class LuckyEffects {
     }))
             .addPool(LuckyEffectPools.DEFAULT, 1)
             .build();
-    public static final SimpleLuckyEffect PLACE_STRUCTURE = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "place_structure"), ((world, pos, state, player) -> {
+    public static final SimpleLuckyEffect PLACE_STRUCTURE = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "place_structure"), LuckyEffects::placeStructure)
+            .addPool(LuckyEffectPools.DEFAULT, 0.1)
+            .build();
+    public static final SimpleLuckyEffect SPAWN_WITHER = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "spawn_wither"),
+            (world, pos, state, player) -> {
+        spawnWither(world, pos, player, false);
+        return true;
+    })
+            .addPool(LuckyEffectPools.WITHER, 1)
+            .build();
+    public static final SimpleLuckyEffect DROP_DIAMOND = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "drop_diamond"), ((world, pos, state, player) -> {
+        ItemStack diamond = new ItemStack(Items.DIAMOND);
+        diamond.set(DataComponentTypes.CUSTOM_NAME, Text.of("Not a diamund"));
+        return world.spawnEntity(new ItemEntity(world, pos.getX(), pos.getY(), pos.getZ(), diamond));
+    }))
+            .addPool(LuckyEffectPools.DEFAULT, 1)
+            .build();
+    public static final SimpleLuckyEffect DROP_KB_STICK = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID,"drop_kb_stick"), ((world, pos, state, player) -> {
+        ItemStack kb_stick = new ItemStack(Items.STICK);
+        ItemEnchantmentsComponent.Builder builder = new ItemEnchantmentsComponent.Builder(ItemEnchantmentsComponent.DEFAULT);
+        Optional<RegistryEntry.Reference<Enchantment>> optKnockback = world.getRegistryManager().get(RegistryKeys.ENCHANTMENT).getEntry(Enchantments.KNOCKBACK);
+        if (optKnockback.isEmpty()) {
+            LOGGER.warn("Knockback enchantment didn't exist? Skipping DROP_KB_STICK.");
+            return false;
+        }
+        builder.add(optKnockback.get(), 4);
+        kb_stick.set(DataComponentTypes.ENCHANTMENTS,
+                builder.build());
+        return world.spawnEntity(new ItemEntity(world, pos.getX(), pos.getY(), pos.getZ(), kb_stick));
+    }))
+            .addPool(LuckyEffectPools.WEAPON, 1)
+            .build();
+
+    private static boolean placeStructure(ServerWorld world, BlockPos pos, BlockState state, ServerPlayerEntity player) {
         // A lot of this comes from PlaceCommand#executePlaceStructure
         var optStructure = world.getRegistryManager().get(RegistryKeys.STRUCTURE).getRandom(player.getRandom());
         if (optStructure.isEmpty()) {
@@ -101,38 +135,7 @@ public class LuckyEffects {
         );
         player.sendMessage(Text.of("[").copy().append(state.getBlock().getName()).append("] I built something for you! Take a look around.")); // TODO: Localize
         return true;
-    }))
-            .addPool(LuckyEffectPools.DEFAULT, 0.1)
-            .build();
-    public static final SimpleLuckyEffect SPAWN_WITHER = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "spawn_wither"),
-            (world, pos, state, player) -> {
-        spawnWither(world, pos, player, false);
-        return true;
-    })
-            .addPool(LuckyEffectPools.WITHER, 1)
-            .build();
-    public static final SimpleLuckyEffect DROP_DIAMOND = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "drop_diamond"), ((world, pos, state, player) -> {
-        ItemStack diamond = new ItemStack(Items.DIAMOND);
-        diamond.set(DataComponentTypes.CUSTOM_NAME, Text.of("Not a diamund"));
-        return world.spawnEntity(new ItemEntity(world, pos.getX(), pos.getY(), pos.getZ(), diamond));
-    }))
-            .addPool(LuckyEffectPools.DEFAULT, 1)
-            .build();
-    public static final SimpleLuckyEffect DROP_KB_STICK = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID,"drop_kb_stick"), ((world, pos, state, player) -> {
-        ItemStack kb_stick = new ItemStack(Items.STICK);
-        ItemEnchantmentsComponent.Builder builder = new ItemEnchantmentsComponent.Builder(ItemEnchantmentsComponent.DEFAULT);
-        Optional<RegistryEntry.Reference<Enchantment>> optKnockback = world.getRegistryManager().get(RegistryKeys.ENCHANTMENT).getEntry(Enchantments.KNOCKBACK);
-        if (optKnockback.isEmpty()) {
-            LOGGER.warn("Knockback enchantment didn't exist? Skipping DROP_KB_STICK.");
-            return false;
-        }
-        builder.add(optKnockback.get(), 4);
-        kb_stick.set(DataComponentTypes.ENCHANTMENTS,
-                builder.build());
-        return world.spawnEntity(new ItemEntity(world, pos.getX(), pos.getY(), pos.getZ(), kb_stick));
-    }))
-            .addPool(LuckyEffectPools.WEAPON, 1)
-            .build();
+    }
 
     private static boolean spawnIronGolem(ServerWorld world, BlockPos pos, ServerPlayerEntity player, boolean angry) {
         IronGolemEntity golem = EntityType.IRON_GOLEM.spawn(world, pos, SpawnReason.COMMAND);
