@@ -26,7 +26,7 @@ import static com.skycatdev.skycatsluckyblocks.SkycatsLuckyBlocks.MOD_ID;
 
 public class LuckyEffects {
     public static final SimpleLuckyEffect SAY_HI = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "say_hi"), (world, pos, state, player) -> {
-        player.sendMessage(Text.of("[Lucky Block] Hi"));
+        player.sendMessage(Text.of("[Lucky Block] Hi")); // TODO: Localize
         return true;
     })
             .addPool(LuckyEffectPools.DEFAULT, 0.1)
@@ -38,6 +38,7 @@ public class LuckyEffects {
             .addPool(LuckyEffectPools.DEFAULT, 1)
             .build();
     public static final SimpleLuckyEffect RANDOM_TREE = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "random_tree"), ((world, pos, state, player) -> {
+        pos = pos.up();
         SaplingGenerator[] generators = SaplingGeneratorMixin.getGENERATORS().values().toArray(new SaplingGenerator[0]);
         Random random = player.getRandom();
         return generators[random.nextInt(generators.length)].generate(world, world.getChunkManager().getChunkGenerator(), pos, state, random);
