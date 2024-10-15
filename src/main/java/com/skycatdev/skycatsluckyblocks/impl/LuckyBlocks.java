@@ -12,7 +12,12 @@ import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.util.Identifier;
 
 public class LuckyBlocks {
-    public static final SimpleLuckyBlock LUCKY_BLOCK = register(new SimpleLuckyBlock(AbstractBlock.Settings.create().sounds(BlockSoundGroup.GLASS).solid(), LuckyEffectPools.DEFAULT), "lucky_block", true);
+    public static final SimpleLuckyBlock LUCKY_BLOCK = register(new SimpleLuckyBlock(AbstractBlock.Settings.create().sounds(BlockSoundGroup.GLASS).solid(),
+            LuckyEffectPools.DEFAULT), "lucky_block", true);
+    public static final SimpleLuckyBlock WITHER_BLOCK = register(new SimpleLuckyBlock(AbstractBlock.Settings.create().sounds(BlockSoundGroup.SOUL_SAND).solid(),
+            LuckyEffectPools.WITHER), "wither_lucky_block", true);
+    public static final SimpleLuckyBlock WEAPOM_BLOCK = register(new SimpleLuckyBlock(AbstractBlock.Settings.create().sounds(BlockSoundGroup.GLASS).solid(),
+            LuckyEffectPools.WEAPON), "weapon_lucky_block", true);
 
     public static void init() {
 
