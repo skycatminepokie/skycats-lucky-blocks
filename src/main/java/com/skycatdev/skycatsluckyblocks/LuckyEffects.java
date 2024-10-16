@@ -182,14 +182,14 @@ public class LuckyEffects {
             return;
         }
         if (scale <= 1.01) {
-            livingEntity.setCustomName(Text.of("Uncomfortably Big " + entityTypeName));
+            livingEntity.setCustomName(Text.of("Uncomfortably Large " + entityTypeName));
         }
         if (scale <= 1.1) {
-            livingEntity.setCustomName(Text.of("Slightly Big " + entityTypeName));
+            livingEntity.setCustomName(Text.of("Slightly Large " + entityTypeName));
             return;
         }
         if (scale <= 1.4) {
-            livingEntity.setCustomName(Text.of("Big " + entityTypeName));
+            livingEntity.setCustomName(Text.of("Large " + entityTypeName));
             return;
         }
         livingEntity.setCustomName(Text.of("Chonky " + entityTypeName));
