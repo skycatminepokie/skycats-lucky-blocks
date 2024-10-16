@@ -161,7 +161,7 @@ public class LuckyEffects {
     @SuppressWarnings("unused") public static final SimpleLuckyEffect PLACE_TNT_CUBE = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "place_tnt_cube"), (world, pos, state, player) -> {
         placeStructure(world, pos, pos, player, Identifier.of(MOD_ID, "hollow_tnt_cube"), false);
         if (player.getRandom().nextBoolean()) {
-            var tnt = EntityType.TNT.create(world, (e)->{}, pos.south().east().up(), SpawnReason.COMMAND, true, false);
+            TntEntity tnt = EntityType.TNT.create(world, (e) -> {}, pos.south().east().up(), SpawnReason.COMMAND, true, false);
             if (tnt == null) {
                 return false;
             }
@@ -171,6 +171,18 @@ public class LuckyEffects {
         } else {
             world.setBlockState(pos.south().east().up(), Blocks.TNT.getDefaultState());
         }
+        return true;
+    })
+            .addPool(LuckyEffectPools.DEFAULT, 1)
+            .build();
+    @SuppressWarnings("unused") public static final SimpleLuckyEffect SPAWN_LONG_FUSE_TNT = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "spawn_long_fuse_tnt"), (world, pos, state, player) -> {
+        TntEntity tnt = EntityType.TNT.create(world, (e) -> {}, pos, SpawnReason.COMMAND, false, false);
+        if (tnt == null) {
+            return false;
+        }
+        tnt.setFuse(player.getRandom().nextBetween(100, 800));
+        world.spawnNewEntityAndPassengers(tnt);
+        world.playSound(null, tnt.getX(), tnt.getY(), tnt.getZ(), SoundEvents.ENTITY_TNT_PRIMED, SoundCategory.BLOCKS, 1, 1);
         return true;
     })
             .addPool(LuckyEffectPools.DEFAULT, 1)
