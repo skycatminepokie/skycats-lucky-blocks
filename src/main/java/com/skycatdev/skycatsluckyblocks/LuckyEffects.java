@@ -16,6 +16,8 @@ import net.minecraft.entity.*;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.boss.WitherEntity;
+import net.minecraft.entity.mob.CreeperEntity;
+import net.minecraft.entity.passive.BatEntity;
 import net.minecraft.entity.passive.IronGolemEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -183,6 +185,20 @@ public class LuckyEffects {
         tnt.setFuse(player.getRandom().nextBetween(100, 800));
         world.spawnNewEntityAndPassengers(tnt);
         world.playSound(null, tnt.getX(), tnt.getY(), tnt.getZ(), SoundEvents.ENTITY_TNT_PRIMED, SoundCategory.BLOCKS, 1, 1);
+        return true;
+    })
+            .addPool(LuckyEffectPools.DEFAULT, 1)
+            .build();
+    @SuppressWarnings("unused") public static final SimpleLuckyEffect SPAWN_CREEPERS_ON_BATS = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "spawn_creepers_on_bats"), (world, pos, state, player) -> {
+        for (int i = 0; i < 3; i++) {
+            CreeperEntity creeper = EntityType.CREEPER.create(world, (e) -> {}, pos, SpawnReason.COMMAND, false, false);
+            BatEntity bat = EntityType.BAT.create(world, (e)-> {}, pos, SpawnReason.COMMAND, false, false);
+            if (creeper == null || bat == null) {
+                return i != 0; // If we haven't spawned yet, then whatever, try again. If we have, then just go with what we have
+            }
+            creeper.startRiding(bat);
+            world.spawnNewEntityAndPassengers(bat);
+        }
         return true;
     })
             .addPool(LuckyEffectPools.DEFAULT, 1)
