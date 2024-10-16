@@ -21,6 +21,7 @@ import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.server.filter.FilteredMessage;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvents;
@@ -36,6 +37,7 @@ import net.minecraft.util.math.random.Random;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
 import net.minecraft.world.gen.structure.Structure;
 
+import java.util.List;
 import java.util.Optional;
 
 import static com.skycatdev.skycatsluckyblocks.SkycatsLuckyBlocks.LOGGER;
@@ -147,7 +149,7 @@ public class LuckyEffects {
             .build();
     public static final SimpleLuckyEffect SUMMON_CHARGED_CREEPER = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "summon_charged_creeper"), (world, pos, state, player) -> {
         EntityType.CREEPER.spawn(world, pos, SpawnReason.COMMAND);
-        EntityType.LIGHTNING_BOLT.spawn(world, pos, SpawnReason.COMMAND);
+        EntityType.LIGHTNING_BOLT.spawn(world, pos.up(), SpawnReason.COMMAND);
         return true;
     })
             .addPool(LuckyEffectPools.DEFAULT, 1)
@@ -203,7 +205,7 @@ public class LuckyEffects {
                             .with(Properties.ROTATION, RotationPropertyHelper.fromYaw(player.getYaw() + 180)));
             BlockEntity blockEntity = world.getBlockEntity(signPos);
             if (blockEntity instanceof SignBlockEntity signBlockEntity) {
-                signBlockEntity.changeText((text) -> text.withMessage(1, Text.of("Look up")), true);
+                signBlockEntity.tryChangeText(player, true, List.of(FilteredMessage.EMPTY, FilteredMessage.permitted("Look up")));
             } else {
                 LOGGER.warn("Couldn't set the text of the sign, as the block entity was either null or not a sign block entity :thinking:. Can't skip it at this point, so we'll go with it.");
             }
