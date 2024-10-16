@@ -41,8 +41,8 @@ import java.util.Optional;
 import static com.skycatdev.skycatsluckyblocks.SkycatsLuckyBlocks.LOGGER;
 import static com.skycatdev.skycatsluckyblocks.SkycatsLuckyBlocks.MOD_ID;
 
+@SuppressWarnings("unused")
 public class LuckyEffects {
-
     public static final SimpleLuckyEffect SAY_HI = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "say_hi"), (world, pos, state, player) -> {
         player.sendMessage(Text.of("[Lucky Block] Hi")); // TODO: Localize
         return true;
@@ -63,10 +63,7 @@ public class LuckyEffects {
     public static final SimpleLuckyEffect PLACE_STRUCTURE = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "place_structure"), LuckyEffects::placeStructure)
             .addPool(LuckyEffectPools.DEFAULT, 0.1)
             .build();
-    public static final SimpleLuckyEffect SPAWN_WITHER = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "spawn_wither"),
-            (world, pos, state, player) -> {    ;
-        return spawnWither(world, pos);
-    })
+    public static final SimpleLuckyEffect SPAWN_WITHER = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "spawn_wither"), (world, pos, state, player) -> spawnWither(world, pos))
             .addPool(LuckyEffectPools.WITHER, 1)
             .build();
     public static final SimpleLuckyEffect DROP_DIAMOND = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "drop_diamond"), (world, pos, state, player) -> {
@@ -76,7 +73,7 @@ public class LuckyEffects {
     })
             .addPool(LuckyEffectPools.DEFAULT, 1)
             .build();
-    public static final SimpleLuckyEffect DROP_KB_STICK = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID,"drop_kb_stick"), (world, pos, state, player) -> {
+    public static final SimpleLuckyEffect DROP_KB_STICK = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "drop_kb_stick"), (world, pos, state, player) -> {
         ItemStack kb_stick = new ItemStack(Items.STICK);
         ItemEnchantmentsComponent.Builder builder = new ItemEnchantmentsComponent.Builder(ItemEnchantmentsComponent.DEFAULT);
         Optional<RegistryEntry.Reference<Enchantment>> optKnockback = world.getRegistryManager().get(RegistryKeys.ENCHANTMENT).getEntry(Enchantments.KNOCKBACK);
@@ -92,8 +89,6 @@ public class LuckyEffects {
     })
             .addPool(LuckyEffectPools.WEAPON, 1)
             .build();
-
-
     public static final SimpleLuckyEffect DROP_WOOD_SWORD = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "drop_wood_sword"), ((world, pos, state, player) -> {
         ItemStack wood_sword = new ItemStack(Items.WOODEN_SWORD);
         ItemEnchantmentsComponent.Builder builder = new ItemEnchantmentsComponent.Builder(ItemEnchantmentsComponent.DEFAULT);
@@ -109,8 +104,7 @@ public class LuckyEffects {
     }))
             .addPool(LuckyEffectPools.WEAPON, 3)
             .build();
-
-    public static final SimpleLuckyEffect DROP_DIAMOND_SWORD = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID,"drop_diamond_sword"), ((world, pos, state, player) -> {
+    public static final SimpleLuckyEffect DROP_DIAMOND_SWORD = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "drop_diamond_sword"), ((world, pos, state, player) -> {
         ItemStack diamond_sword = new ItemStack(Items.DIAMOND_SWORD);
         ItemEnchantmentsComponent.Builder builder = new ItemEnchantmentsComponent.Builder(ItemEnchantmentsComponent.DEFAULT);
         Optional<RegistryEntry.Reference<Enchantment>> optSilkTouch = world.getRegistryManager().get(RegistryKeys.ENCHANTMENT).getEntry(Enchantments.SILK_TOUCH);
@@ -146,84 +140,6 @@ public class LuckyEffects {
             .addPool(LuckyEffectPools.DEFAULT, 1)
             .build();
 
-    private static boolean placeLavaCage(ServerWorld world, BlockPos pos, BlockState state, ServerPlayerEntity player) {
-        BlockPos structurePos = player.getBlockPos().offset(player.getHorizontalFacing(), 3).offset(player.getHorizontalFacing().rotateYCounterclockwise()).down(1);
-        boolean success = placeStructure(world, structurePos, structurePos, player, Identifier.of(MOD_ID, "lava_cage"), true);
-        if (success) {
-            BlockPos signPos = structurePos.up().offset(player.getHorizontalFacing().rotateYClockwise(), 1);
-            world.setBlockState(signPos,
-                    Blocks.OAK_SIGN.getDefaultState().rotate(rotationFromNorth(player.getHorizontalFacing()))
-                    .with(Properties.ROTATION, RotationPropertyHelper.fromYaw(player.getYaw() + 180)));
-            BlockEntity blockEntity = world.getBlockEntity(signPos);
-            if (blockEntity instanceof SignBlockEntity signBlockEntity) {
-                signBlockEntity.changeText((text) -> text.withMessage(1, Text.of("Look up")), true);
-            } else {
-                LOGGER.warn("Couldn't set the text of the sign, as the block entity was either null or not a sign block entity :thinking:. Can't skip it at this point, so we'll go with it.");
-            }
-        }
-        return success;
-    }
-
-    private static BlockRotation rotationFromNorth(Direction direction) {
-        return switch (direction) {
-            case EAST -> BlockRotation.CLOCKWISE_90;
-            case SOUTH -> BlockRotation.CLOCKWISE_180;
-            case WEST -> BlockRotation.COUNTERCLOCKWISE_90;
-            case null, default -> BlockRotation.NONE;
-        };
-    }
-
-    /**
-     * Places a structure template (from a lucky block).
-     * @param world The world to place it in.
-     * @param pos The position to place it at.
-     * @param pivot The position to pivot on.
-     * @param player The player that opened the lucky block.
-     * @param structure The id of the structure to place.
-     * @param rotate Whether to rotate to match the player. This assumes the structure is built as if the player is facing north.
-     * @return {@code true} on success
-     */
-    private static boolean placeStructure(ServerWorld world, BlockPos pos, BlockPos pivot, ServerPlayerEntity player, Identifier structure, boolean rotate) {
-        Optional<StructureTemplate> optTemplate = world.getStructureTemplateManager().getTemplate(structure);
-        if (optTemplate.isEmpty()) {
-            LOGGER.warn("Couldn't find structure {}. Skipping.", structure);
-            return false;
-        }
-        StructurePlacementData placementData = new StructurePlacementData();
-        if (rotate) {
-            placementData.setRotation(rotationFromNorth(player.getHorizontalFacing()));
-        }
-        optTemplate.get().place(world, pos, pivot, placementData, player.getRandom(), 2);
-        return true;
-    }
-
-    private static boolean spawnScaledMob(ServerWorld world, BlockPos pos, BlockState state, ServerPlayerEntity player) {
-        EntityType<?> entityType = Utils.getRandomFromTag(Registries.ENTITY_TYPE, SkycatsLuckyBlocksTags.SPAWN_SCALED_MOB_MOBS, player.getRandom());
-        if (entityType == null) {
-            LOGGER.warn("Couldn't get a random mob from SPAWN_SCALED_MOB_MOBS, is it empty?");
-            return false;
-        }
-        Entity entity = entityType.create(world, e -> {
-        }, pos, SpawnReason.COMMAND, true, false);
-        if (entity instanceof LivingEntity livingEntity) {
-            EntityAttributeInstance attribute = livingEntity.getAttributeInstance(EntityAttributes.GENERIC_SCALE);
-            if (attribute == null) {
-                LOGGER.warn("Random mob from SPAWN_SCALED_MOB_MOBS \"{}\" has no scale attribute!", entity.getName().getString());
-                entity.discard();
-                return false;
-            }
-            double scale = new java.util.Random(player.getRandom().nextLong()).nextDouble(0.5, 1.5); // TODO: possibly could be optimized by not creating the random
-            attribute.setBaseValue(scale);
-            giveScaledName(livingEntity, scale);
-            world.spawnNewEntityAndPassengers(livingEntity);
-            return true;
-        } else {
-            LOGGER.warn("Random mob from SPAWN_SCALED_MOB_MOBS \"{}\" was not a LivingEntity and it must be!", entity.getName().getString());
-            entity.discard();
-            return false;
-        }
-    }
-
     private static void giveScaledName(LivingEntity livingEntity, double scale) {
         String entityTypeName = livingEntity.getType().getName().getString();
         if (scale <= 0.6) {
@@ -258,6 +174,28 @@ public class LuckyEffects {
             return;
         }
         livingEntity.setCustomName(Text.of("Chonky " + entityTypeName));
+    }
+
+    public static void init() {
+
+    }
+
+    private static boolean placeLavaCage(ServerWorld world, BlockPos pos, BlockState state, ServerPlayerEntity player) {
+        BlockPos structurePos = player.getBlockPos().offset(player.getHorizontalFacing(), 3).offset(player.getHorizontalFacing().rotateYCounterclockwise()).down(1);
+        boolean success = placeStructure(world, structurePos, structurePos, player, Identifier.of(MOD_ID, "lava_cage"), true);
+        if (success) {
+            BlockPos signPos = structurePos.up().offset(player.getHorizontalFacing().rotateYClockwise(), 1);
+            world.setBlockState(signPos,
+                    Blocks.OAK_SIGN.getDefaultState().rotate(rotationFromNorth(player.getHorizontalFacing()))
+                            .with(Properties.ROTATION, RotationPropertyHelper.fromYaw(player.getYaw() + 180)));
+            BlockEntity blockEntity = world.getBlockEntity(signPos);
+            if (blockEntity instanceof SignBlockEntity signBlockEntity) {
+                signBlockEntity.changeText((text) -> text.withMessage(1, Text.of("Look up")), true);
+            } else {
+                LOGGER.warn("Couldn't set the text of the sign, as the block entity was either null or not a sign block entity :thinking:. Can't skip it at this point, so we'll go with it.");
+            }
+        }
+        return success;
     }
 
     private static boolean placeStructure(ServerWorld world, BlockPos pos, BlockState state, ServerPlayerEntity player) {
@@ -307,6 +245,40 @@ public class LuckyEffects {
         return true;
     }
 
+    /**
+     * Places a structure template (from a lucky block).
+     *
+     * @param world     The world to place it in.
+     * @param pos       The position to place it at.
+     * @param pivot     The position to pivot on.
+     * @param player    The player that opened the lucky block.
+     * @param structure The id of the structure to place.
+     * @param rotate    Whether to rotate to match the player. This assumes the structure is built as if the player is facing north.
+     * @return {@code true} on success
+     */
+    private static boolean placeStructure(ServerWorld world, BlockPos pos, BlockPos pivot, ServerPlayerEntity player, Identifier structure, boolean rotate) {
+        Optional<StructureTemplate> optTemplate = world.getStructureTemplateManager().getTemplate(structure);
+        if (optTemplate.isEmpty()) {
+            LOGGER.warn("Couldn't find structure {}. Skipping.", structure);
+            return false;
+        }
+        StructurePlacementData placementData = new StructurePlacementData();
+        if (rotate) {
+            placementData.setRotation(rotationFromNorth(player.getHorizontalFacing()));
+        }
+        optTemplate.get().place(world, pos, pivot, placementData, player.getRandom(), 2);
+        return true;
+    }
+
+    private static BlockRotation rotationFromNorth(Direction direction) {
+        return switch (direction) {
+            case EAST -> BlockRotation.CLOCKWISE_90;
+            case SOUTH -> BlockRotation.CLOCKWISE_180;
+            case WEST -> BlockRotation.COUNTERCLOCKWISE_90;
+            case null, default -> BlockRotation.NONE;
+        };
+    }
+
     private static boolean spawnIronGolem(ServerWorld world, BlockPos pos, ServerPlayerEntity player, boolean angry) {
         IronGolemEntity golem = EntityType.IRON_GOLEM.spawn(world, pos, SpawnReason.COMMAND);
         if (golem != null) {
@@ -320,6 +292,34 @@ public class LuckyEffects {
             return false;
         }
     }
+
+    private static boolean spawnScaledMob(ServerWorld world, BlockPos pos, BlockState state, ServerPlayerEntity player) {
+        EntityType<?> entityType = Utils.getRandomFromTag(Registries.ENTITY_TYPE, SkycatsLuckyBlocksTags.SPAWN_SCALED_MOB_MOBS, player.getRandom());
+        if (entityType == null) {
+            LOGGER.warn("Couldn't get a random mob from SPAWN_SCALED_MOB_MOBS, is it empty?");
+            return false;
+        }
+        Entity entity = entityType.create(world, e -> {
+        }, pos, SpawnReason.COMMAND, true, false);
+        if (entity instanceof LivingEntity livingEntity) {
+            EntityAttributeInstance attribute = livingEntity.getAttributeInstance(EntityAttributes.GENERIC_SCALE);
+            if (attribute == null) {
+                LOGGER.warn("Random mob from SPAWN_SCALED_MOB_MOBS \"{}\" has no scale attribute!", entity.getName().getString());
+                entity.discard();
+                return false;
+            }
+            double scale = new java.util.Random(player.getRandom().nextLong()).nextDouble(0.5, 1.5); // TODO: possibly could be optimized by not creating the random
+            attribute.setBaseValue(scale);
+            giveScaledName(livingEntity, scale);
+            world.spawnNewEntityAndPassengers(livingEntity);
+            return true;
+        } else {
+            LOGGER.warn("Random mob from SPAWN_SCALED_MOB_MOBS \"{}\" was not a LivingEntity and it must be!", entity.getName().getString());
+            entity.discard();
+            return false;
+        }
+    }
+
     private static boolean spawnWither(ServerWorld world, BlockPos pos) {
         WitherEntity wither = EntityType.WITHER.spawn(world, pos, SpawnReason.CONVERSION);
         if (wither != null) {
@@ -332,10 +332,6 @@ public class LuckyEffects {
             LOGGER.warn("Couldn't spawn a wither for spawn_wither effect");
             return false;
         }
-
-    }
-
-    public static void init() {
 
     }
 
