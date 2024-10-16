@@ -5,10 +5,14 @@
     "minecraft:enderman",
     "minecraft:skeleton",
     "minecraft:zombie",
+    "minecraft:witch",
+    "minecraft:silverfish",
     "minecraft:camel",
     "minecraft:cat",
     "minecraft:cow",
     "minecraft:fox",
-    "minecraft:iron_golem"
+    "minecraft:iron_golem",
+    "minecraft:pig",
+    "minecraft:donkey"
   ]
 }
