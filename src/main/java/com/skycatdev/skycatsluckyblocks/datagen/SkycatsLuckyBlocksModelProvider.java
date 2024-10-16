@@ -15,6 +15,8 @@ public class SkycatsLuckyBlocksModelProvider extends FabricModelProvider {
     @Override
     public void generateBlockStateModels(BlockStateModelGenerator blockStateModelGenerator) {
         blockStateModelGenerator.registerSimpleCubeAll(LuckyBlocks.LUCKY_BLOCK);
+        blockStateModelGenerator.registerSimpleCubeAll(LuckyBlocks.WEAPON_BLOCK);
+        blockStateModelGenerator.registerSimpleCubeAll(LuckyBlocks.WITHER_BLOCK);
     }
 
     @Override

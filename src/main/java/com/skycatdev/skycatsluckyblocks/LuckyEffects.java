@@ -39,6 +39,7 @@ import static com.skycatdev.skycatsluckyblocks.SkycatsLuckyBlocks.LOGGER;
 import static com.skycatdev.skycatsluckyblocks.SkycatsLuckyBlocks.MOD_ID;
 
 public class LuckyEffects {
+
     public static final SimpleLuckyEffect SAY_HI = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "say_hi"), (world, pos, state, player) -> {
         player.sendMessage(Text.of("[Lucky Block] Hi")); // TODO: Localize
         return true;
@@ -46,7 +47,7 @@ public class LuckyEffects {
             .addPool(LuckyEffectPools.DEFAULT, 0.1)
             .build();
     public static final SimpleLuckyEffect SPAWN_IRON_GOLEM = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "spawn_iron_golem"), (world, pos, state, player) -> spawnIronGolem(world, pos, player, player.getRandom().nextBoolean()))
-            .addPool(LuckyEffectPools.DEFAULT, 1)
+            .addPool(LuckyEffectPools.DEFAULT, 0.3)
             .build();
     public static final SimpleLuckyEffect RANDOM_TREE = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "random_tree"), ((world, pos, state, player) -> {
         pos = pos.up();
@@ -60,9 +61,8 @@ public class LuckyEffects {
             .addPool(LuckyEffectPools.DEFAULT, 0.1)
             .build();
     public static final SimpleLuckyEffect SPAWN_WITHER = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "spawn_wither"),
-            (world, pos, state, player) -> {
-        spawnWither(world, pos, player, false);
-        return true;
+            (world, pos, state, player) -> {    ;
+        return spawnWither(world, pos);
     })
             .addPool(LuckyEffectPools.WITHER, 1)
             .build();
@@ -81,12 +81,48 @@ public class LuckyEffects {
             LOGGER.warn("Knockback enchantment didn't exist? Skipping DROP_KB_STICK.");
             return false;
         }
+
         builder.add(optKnockback.get(), 4);
         kb_stick.set(DataComponentTypes.ENCHANTMENTS,
                 builder.build());
         return world.spawnEntity(new ItemEntity(world, pos.getX(), pos.getY(), pos.getZ(), kb_stick));
     })
             .addPool(LuckyEffectPools.WEAPON, 1)
+            .build();
+
+
+    public static final SimpleLuckyEffect DROP_WOOD_SWORD = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "drop_wood_sword"), ((world, pos, state, player) -> {
+        ItemStack wood_sword = new ItemStack(Items.WOODEN_SWORD);
+        ItemEnchantmentsComponent.Builder builder = new ItemEnchantmentsComponent.Builder(ItemEnchantmentsComponent.DEFAULT);
+        Optional<RegistryEntry.Reference<Enchantment>> optSharpness = world.getRegistryManager().get(RegistryKeys.ENCHANTMENT).getEntry(Enchantments.SHARPNESS);
+        if (optSharpness.isEmpty()) {
+            LOGGER.warn("Your blade is dull (._.), skipping DROP_WOOD_SWORD");
+            return false;
+        }
+        builder.add(optSharpness.get(), 10);
+        wood_sword.set(DataComponentTypes.ENCHANTMENTS,
+                builder.build());
+        return world.spawnEntity(new ItemEntity(world, pos.getX(), pos.getY(), pos.getZ(), wood_sword));
+    }))
+            .addPool(LuckyEffectPools.WEAPON, 3)
+            .build();
+
+    public static final SimpleLuckyEffect DROP_DIAMOND_SWORD = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID,"drop_diamond_sword"), ((world, pos, state, player) -> {
+        ItemStack diamond_sword = new ItemStack(Items.DIAMOND_SWORD);
+        ItemEnchantmentsComponent.Builder builder = new ItemEnchantmentsComponent.Builder(ItemEnchantmentsComponent.DEFAULT);
+        Optional<RegistryEntry.Reference<Enchantment>> optSilkTouch = world.getRegistryManager().get(RegistryKeys.ENCHANTMENT).getEntry(Enchantments.SILK_TOUCH);
+        if (optSilkTouch.isEmpty()) {
+            LOGGER.warn("Sharpness has been deleted, send help, couldn't give you the garbage. Failed DROP_DIAMOND_SWORD");
+            return false;
+        }
+        builder.add(optSilkTouch.get(), 2);
+
+        diamond_sword.set(DataComponentTypes.CUSTOM_NAME, Text.of("It's Garbage"));
+        diamond_sword.set(DataComponentTypes.ENCHANTMENTS,
+                builder.build());
+        return world.spawnEntity(new ItemEntity(world, pos.getX(), pos.getY(), pos.getZ(), diamond_sword));
+    }))
+            .addPool(LuckyEffectPools.WEAPON, 30)
             .build();
     public static final SimpleLuckyEffect SPAWN_SCALED_MOB = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "spawn_scaled_mob"), LuckyEffects::spawnScaledMob)
             .addPool(LuckyEffectPools.DEFAULT, 1)
@@ -255,11 +291,13 @@ public class LuckyEffects {
             return false;
         }
     }
-    private static boolean spawnWither(ServerWorld world, BlockPos pos, ServerPlayerEntity player, boolean angry) {
+    private static boolean spawnWither(ServerWorld world, BlockPos pos) {
         WitherEntity wither = EntityType.WITHER.spawn(world, pos, SpawnReason.CONVERSION);
         if (wither != null) {
             wither.playSound(SoundEvents.ENTITY_WITHER_SPAWN);
-            wither.setHealth(0.1f);
+            wither.setHealth(500f);
+            wither.setCustomName(Text.of("Flying Warden that can see"));
+            LOGGER.info("Spawned a wither");
             return true;
         } else {
             LOGGER.warn("Couldn't spawn a wither for spawn_wither effect");
