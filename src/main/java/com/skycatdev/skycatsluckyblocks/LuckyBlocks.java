@@ -3,6 +3,7 @@ package com.skycatdev.skycatsluckyblocks;
 import com.skycatdev.skycatsluckyblocks.impl.SimpleLuckyBlock;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
+import net.minecraft.block.Blocks;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.registry.Registries;
@@ -11,11 +12,11 @@ import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.util.Identifier;
 
 public class LuckyBlocks {
-    public static final SimpleLuckyBlock LUCKY_BLOCK = register(new SimpleLuckyBlock(AbstractBlock.Settings.create().sounds(BlockSoundGroup.GLASS).solid(),
+    public static final SimpleLuckyBlock LUCKY_BLOCK = register(new SimpleLuckyBlock(AbstractBlock.Settings.copy(Blocks.GLASS).dropsNothing(),
             LuckyEffectPools.DEFAULT), "lucky_block", true);
-    public static final SimpleLuckyBlock WITHER_BLOCK = register(new SimpleLuckyBlock(AbstractBlock.Settings.create().sounds(BlockSoundGroup.SOUL_SAND).solid(),
+    public static final SimpleLuckyBlock WITHER_BLOCK = register(new SimpleLuckyBlock(AbstractBlock.Settings.copy(Blocks.GLASS).dropsNothing().sounds(BlockSoundGroup.SOUL_SAND),
             LuckyEffectPools.WITHER), "wither_lucky_block", true);
-    public static final SimpleLuckyBlock WEAPON_BLOCK = register(new SimpleLuckyBlock(AbstractBlock.Settings.create().sounds(BlockSoundGroup.GLASS).solid(),
+    public static final SimpleLuckyBlock WEAPON_BLOCK = register(new SimpleLuckyBlock(AbstractBlock.Settings.copy(Blocks.GLASS).dropsNothing(),
             LuckyEffectPools.WEAPON), "weapon_lucky_block", true);
 
     public static void init() {
