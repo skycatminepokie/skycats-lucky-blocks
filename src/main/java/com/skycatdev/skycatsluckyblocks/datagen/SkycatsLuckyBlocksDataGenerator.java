@@ -10,5 +10,6 @@ public class SkycatsLuckyBlocksDataGenerator implements DataGeneratorEntrypoint 
 		pack.addProvider(SkycatsLuckyBlocksEnglishLangProvider::new);
 		pack.addProvider(SkycatsLuckyBlocksModelProvider::new);
 		pack.addProvider(SkycatsLuckyBlocksEntityTypeTagGenerator::new);
+		pack.addProvider(SkycatsLuckyBlocksRecipeGenerator::new);
 	}
 }

@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "d": {
+      "item": "minecraft:dispenser"
+    },
+    "g": {
+      "item": "minecraft:gold_ingot"
+    }
+  },
+  "pattern": [
+    "ggg",
+    "gdg",
+    "ggg"
+  ],
+  "result": {
+    "count": 1,
+    "id": "skycats-lucky-blocks:lucky_block"
+  }
+}
