@@ -31,11 +31,15 @@ public class SkycatsLuckyBlocksEntityTypeTagGenerator extends FabricTagProvider<
                 .add(EntityType.ENDERMAN)
                 .add(EntityType.SKELETON)
                 .add(EntityType.ZOMBIE)
+                .add(EntityType.WITCH)
+                .add(EntityType.SILVERFISH)
 
                 .add(EntityType.CAMEL)
                 .add(EntityType.CAT)
                 .add(EntityType.COW)
                 .add(EntityType.FOX)
-                .add(EntityType.IRON_GOLEM);
+                .add(EntityType.IRON_GOLEM)
+                .add(EntityType.PIG)
+                .add(EntityType.DONKEY);
     }
 }
