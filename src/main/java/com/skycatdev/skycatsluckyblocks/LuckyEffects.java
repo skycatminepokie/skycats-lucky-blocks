@@ -3,6 +3,7 @@ package com.skycatdev.skycatsluckyblocks;
 import com.skycatdev.skycatsluckyblocks.impl.SimpleLuckyEffect;
 import com.skycatdev.skycatsluckyblocks.mixin.SaplingGeneratorMixin;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.SaplingGenerator;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.ItemEnchantmentsComponent;
@@ -25,11 +26,9 @@ import net.minecraft.structure.StructurePlacementData;
 import net.minecraft.structure.StructureStart;
 import net.minecraft.structure.StructureTemplate;
 import net.minecraft.text.Text;
+import net.minecraft.util.BlockRotation;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockBox;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.ChunkSectionPos;
+import net.minecraft.util.math.*;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
 import net.minecraft.world.gen.structure.Structure;
@@ -92,18 +91,44 @@ public class LuckyEffects {
     public static final SimpleLuckyEffect SPAWN_SCALED_MOB = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "spawn_scaled_mob"), LuckyEffects::spawnScaledMob)
             .addPool(LuckyEffectPools.DEFAULT, 1)
             .build();
-    public static final SimpleLuckyEffect PLACE_CAGE = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "place_cage"), LuckyEffects::placeCage)
+    public static final SimpleLuckyEffect PLACE_CAGE = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "place_cage"), (world, pos, state, player) -> {
+        BlockPos structurePos = player.getBlockPos().west().north();
+        return placeStructure(world, structurePos, structurePos, player, Identifier.of(MOD_ID, "cage"), false);
+    })
+            .addPool(LuckyEffectPools.DEFAULT, 1)
+            .build();
+    public static final SimpleLuckyEffect PLACE_CAKE = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "place_cake"), (world, pos, state, player) -> world.setBlockState(pos, Blocks.CAKE.getDefaultState()))
+            .addPool(LuckyEffectPools.DEFAULT, 1)
+            .build();
+    public static final SimpleLuckyEffect PLACE_LIE_CAKE = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "place_lie_cake"), (world, pos, state, player) -> placeStructure(world, pos, pos, player, Identifier.of(MOD_ID, "lie_cake"), true))
             .addPool(LuckyEffectPools.DEFAULT, 1)
             .build();
 
-    private static boolean placeCage(ServerWorld world, BlockPos pos, BlockState state, ServerPlayerEntity player) {
-        Optional<StructureTemplate> optTemplate = world.getStructureTemplateManager().getTemplate(Identifier.of(MOD_ID, "cage"));
+    /**
+     * Places a structure template (from a lucky block).
+     * @param world The world to place it in.
+     * @param pos The position to place it at.
+     * @param pivot The position to pivot on.
+     * @param player The player that opened the lucky block.
+     * @param structure The id of the structure to place.
+     * @param rotate Whether to rotate to match the player. This assumes the structure is built as if the player is facing north.
+     * @return {@code true} on success
+     */
+    private static boolean placeStructure(ServerWorld world, BlockPos pos, BlockPos pivot, ServerPlayerEntity player, Identifier structure, boolean rotate) {
+        Optional<StructureTemplate> optTemplate = world.getStructureTemplateManager().getTemplate(structure);
         if (optTemplate.isEmpty()) {
-            LOGGER.warn("Couldn't find the cage structure. Skipping.");
+            LOGGER.warn("Couldn't find structure {}. Skipping.", structure);
             return false;
         }
-        BlockPos structPos = player.getBlockPos().west().north();
-        optTemplate.get().place(world, structPos, structPos, new StructurePlacementData(), player.getRandom(), 2);
+        StructurePlacementData placementData = new StructurePlacementData();
+        if (rotate) {
+            switch (player.getHorizontalFacing()) {
+                case EAST -> placementData.setRotation(BlockRotation.CLOCKWISE_90);
+                case SOUTH -> placementData.setRotation(BlockRotation.CLOCKWISE_180);
+                case WEST -> placementData.setRotation(BlockRotation.COUNTERCLOCKWISE_90);
+            }
+        }
+        optTemplate.get().place(world, pos, pivot, placementData, player.getRandom(), 2);
         return true;
     }
 
