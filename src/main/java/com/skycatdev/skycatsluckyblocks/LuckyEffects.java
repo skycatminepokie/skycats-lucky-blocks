@@ -148,8 +148,7 @@ public class LuckyEffects {
     @SuppressWarnings("unused") public static final SimpleLuckyEffect PLACE_PARADOX_CAKE = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "place_paradox_cake"), (world, pos, state, player) -> placeStructure(world, pos, pos, player, Identifier.of(MOD_ID, "paradox_cake"), true))
             .addPool(LuckyEffectPools.DEFAULT, 0.3)
             .build();
-    // TODO: Change to "spawn"
-    @SuppressWarnings("unused") public static final SimpleLuckyEffect SUMMON_CHARGED_CREEPER = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "summon_charged_creeper"), (world, pos, state, player) -> {
+    @SuppressWarnings("unused") public static final SimpleLuckyEffect SPAWN_CHARGED_CREEPER = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "spawn_charged_creeper"), (world, pos, state, player) -> {
         EntityType.CREEPER.spawn(world, pos, SpawnReason.COMMAND);
         EntityType.LIGHTNING_BOLT.spawn(world, pos.up(), SpawnReason.COMMAND);
         return true;
