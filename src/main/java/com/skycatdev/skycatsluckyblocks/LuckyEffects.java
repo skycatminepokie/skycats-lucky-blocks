@@ -25,6 +25,7 @@ import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.filter.FilteredMessage;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.state.property.Properties;
 import net.minecraft.structure.StructurePlacementData;
@@ -62,7 +63,7 @@ public class LuckyEffects {
     }))
             .addPool(LuckyEffectPools.DEFAULT, 1)
             .build();
-    @SuppressWarnings("unused") public static final SimpleLuckyEffect PLACE_STRUCTURE = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "place_structure"), LuckyEffects::placeStructure)
+    @SuppressWarnings("unused") public static final SimpleLuckyEffect PLACE_STRUCTURE = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "place_structure"), LuckyEffects::placeRandomStructure)
             .addPool(LuckyEffectPools.DEFAULT, 0.1)
             .build();
     @SuppressWarnings("unused") public static final SimpleLuckyEffect SPAWN_WITHER = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "spawn_wither"), (world, pos, state, player) -> spawnWither(world, pos))
@@ -147,6 +148,7 @@ public class LuckyEffects {
     @SuppressWarnings("unused") public static final SimpleLuckyEffect PLACE_PARADOX_CAKE = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "place_paradox_cake"), (world, pos, state, player) -> placeStructure(world, pos, pos, player, Identifier.of(MOD_ID, "paradox_cake"), true))
             .addPool(LuckyEffectPools.DEFAULT, 0.3)
             .build();
+    // TODO: Change to "spawn"
     @SuppressWarnings("unused") public static final SimpleLuckyEffect SUMMON_CHARGED_CREEPER = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "summon_charged_creeper"), (world, pos, state, player) -> {
         EntityType.CREEPER.spawn(world, pos, SpawnReason.COMMAND);
         EntityType.LIGHTNING_BOLT.spawn(world, pos.up(), SpawnReason.COMMAND);
@@ -155,6 +157,23 @@ public class LuckyEffects {
             .addPool(LuckyEffectPools.DEFAULT, 1)
             .build();
     @SuppressWarnings("unused") public static final SimpleLuckyEffect SPAWN_SLIME_STACK = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "spawn_slime_stack"), (world, pos, state, player) -> spawnSlimeStack(world, pos, player.getRandom().nextBoolean(), player.getRandom().nextBoolean()))
+            .addPool(LuckyEffectPools.DEFAULT, 1)
+            .build();
+    @SuppressWarnings("unused") public static final SimpleLuckyEffect PLACE_TNT_CUBE = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "place_tnt_cube"), (world, pos, state, player) -> {
+        placeStructure(world, pos, pos, player, Identifier.of(MOD_ID, "hollow_tnt_cube"), false);
+        if (player.getRandom().nextBoolean()) {
+            var tnt = EntityType.TNT.create(world, (e)->{}, pos.south().east().up(), SpawnReason.COMMAND, true, false);
+            if (tnt == null) {
+                return false;
+            }
+            tnt.setFuse(80);
+            world.spawnNewEntityAndPassengers(tnt);
+            world.playSound(null, tnt.getX(), tnt.getY(), tnt.getZ(), SoundEvents.ENTITY_TNT_PRIMED, SoundCategory.BLOCKS, 1, 1);
+        } else {
+            world.setBlockState(pos.south().east().up(), Blocks.TNT.getDefaultState());
+        }
+        return true;
+    })
             .addPool(LuckyEffectPools.DEFAULT, 1)
             .build();
 
@@ -241,7 +260,7 @@ public class LuckyEffects {
         return success;
     }
 
-    private static boolean placeStructure(ServerWorld world, BlockPos pos, BlockState state, ServerPlayerEntity player) {
+    private static boolean placeRandomStructure(ServerWorld world, BlockPos pos, BlockState state, ServerPlayerEntity player) {
         // A lot of this comes from PlaceCommand#executePlaceStructure
         var optStructure = world.getRegistryManager().get(RegistryKeys.STRUCTURE).getRandom(player.getRandom());
         if (optStructure.isEmpty()) {
