@@ -3,7 +3,8 @@
   "package": "com.skycatdev.skycatsluckyblocks.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "SaplingGeneratorMixin"
+    "SaplingGeneratorMixin",
+    "SlimeEntityMixin"
   ],
   "injectors": {
     "defaultRequire": 1

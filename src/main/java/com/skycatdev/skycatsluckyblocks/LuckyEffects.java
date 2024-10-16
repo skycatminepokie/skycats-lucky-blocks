@@ -2,6 +2,7 @@ package com.skycatdev.skycatsluckyblocks;
 
 import com.skycatdev.skycatsluckyblocks.impl.SimpleLuckyEffect;
 import com.skycatdev.skycatsluckyblocks.mixin.SaplingGeneratorMixin;
+import com.skycatdev.skycatsluckyblocks.mixin.SlimeEntityMixin;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.SaplingGenerator;
@@ -43,7 +44,6 @@ import java.util.Optional;
 import static com.skycatdev.skycatsluckyblocks.SkycatsLuckyBlocks.LOGGER;
 import static com.skycatdev.skycatsluckyblocks.SkycatsLuckyBlocks.MOD_ID;
 
-@SuppressWarnings("unused")
 public class LuckyEffects {
     public static final SimpleLuckyEffect SAY_HI = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "say_hi"), (world, pos, state, player) -> {
         player.sendMessage(Text.of("[Lucky Block] Hi")); // TODO: Localize
@@ -154,6 +154,34 @@ public class LuckyEffects {
     })
             .addPool(LuckyEffectPools.DEFAULT, 1)
             .build();
+    public static final SimpleLuckyEffect SPAWN_SLIME_STACK = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "spawn_slime_stack"), (world, pos, state, player) -> spawnSlimeStack(world, pos, player.getRandom().nextBoolean(), player.getRandom().nextBoolean()))
+            .addPool(LuckyEffectPools.DEFAULT, 1)
+            .build();
+
+    private static boolean spawnSlimeStack(ServerWorld world, BlockPos pos, boolean inverted, boolean magma) {
+        int numberInStack = 5;
+        EntityType<?> entityType = magma ? EntityType.MAGMA_CUBE : EntityType.SLIME;
+
+        LivingEntity base = (LivingEntity) entityType.create(world, (e) -> {}, pos, SpawnReason.COMMAND, false, false);
+        if (base == null) {
+            return false;
+        }
+        base.getDataTracker().set(SlimeEntityMixin.getSLIME_SIZE(), inverted ? 1 : numberInStack);
+        base.setHealth(inverted ? 1 : numberInStack * 2);
+        LivingEntity top = base;
+        for (int i = 0; i < numberInStack - 1; i++) {
+            LivingEntity current = (LivingEntity) entityType.create(world, (e) -> {}, pos, SpawnReason.COMMAND, false, false);
+            if (current == null) {
+                return false;
+            }
+            int size = inverted ? i + 2 : numberInStack - (i + 1);
+            current.getDataTracker().set(SlimeEntityMixin.getSLIME_SIZE(), size);
+            current.setHealth((size) * 2); // Doesn't follow vanilla conventions, but it would get quite high quite fast if it did
+            current.startRiding(top);
+            top = current;
+        }
+        return world.spawnNewEntityAndPassengers(base);
+    }
 
     private static void giveScaledName(LivingEntity livingEntity, double scale) {
         String entityTypeName = livingEntity.getType().getName().getString();
