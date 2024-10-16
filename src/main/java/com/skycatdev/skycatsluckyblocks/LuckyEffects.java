@@ -45,16 +45,16 @@ import static com.skycatdev.skycatsluckyblocks.SkycatsLuckyBlocks.LOGGER;
 import static com.skycatdev.skycatsluckyblocks.SkycatsLuckyBlocks.MOD_ID;
 
 public class LuckyEffects {
-    public static final SimpleLuckyEffect SAY_HI = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "say_hi"), (world, pos, state, player) -> {
+    @SuppressWarnings("unused") public static final SimpleLuckyEffect SAY_HI = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "say_hi"), (world, pos, state, player) -> {
         player.sendMessage(Text.of("[Lucky Block] Hi")); // TODO: Localize
         return true;
     })
             .addPool(LuckyEffectPools.DEFAULT, 0.1)
             .build();
-    public static final SimpleLuckyEffect SPAWN_IRON_GOLEM = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "spawn_iron_golem"), (world, pos, state, player) -> spawnIronGolem(world, pos, player, player.getRandom().nextBoolean()))
+    @SuppressWarnings("unused") public static final SimpleLuckyEffect SPAWN_IRON_GOLEM = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "spawn_iron_golem"), (world, pos, state, player) -> spawnIronGolem(world, pos, player, player.getRandom().nextBoolean()))
             .addPool(LuckyEffectPools.DEFAULT, 0.3)
             .build();
-    public static final SimpleLuckyEffect RANDOM_TREE = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "random_tree"), ((world, pos, state, player) -> {
+    @SuppressWarnings("unused") public static final SimpleLuckyEffect RANDOM_TREE = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "random_tree"), ((world, pos, state, player) -> {
         pos = pos.up();
         SaplingGenerator[] generators = SaplingGeneratorMixin.getGENERATORS().values().toArray(new SaplingGenerator[0]);
         Random random = player.getRandom();
@@ -62,20 +62,20 @@ public class LuckyEffects {
     }))
             .addPool(LuckyEffectPools.DEFAULT, 1)
             .build();
-    public static final SimpleLuckyEffect PLACE_STRUCTURE = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "place_structure"), LuckyEffects::placeStructure)
+    @SuppressWarnings("unused") public static final SimpleLuckyEffect PLACE_STRUCTURE = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "place_structure"), LuckyEffects::placeStructure)
             .addPool(LuckyEffectPools.DEFAULT, 0.1)
             .build();
-    public static final SimpleLuckyEffect SPAWN_WITHER = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "spawn_wither"), (world, pos, state, player) -> spawnWither(world, pos))
+    @SuppressWarnings("unused") public static final SimpleLuckyEffect SPAWN_WITHER = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "spawn_wither"), (world, pos, state, player) -> spawnWither(world, pos))
             .addPool(LuckyEffectPools.WITHER, 1)
             .build();
-    public static final SimpleLuckyEffect DROP_DIAMOND = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "drop_diamond"), (world, pos, state, player) -> {
+    @SuppressWarnings("unused") public static final SimpleLuckyEffect DROP_DIAMOND = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "drop_diamond"), (world, pos, state, player) -> {
         ItemStack diamond = new ItemStack(Items.DIAMOND);
         diamond.set(DataComponentTypes.CUSTOM_NAME, Text.of("Not a diamund"));
         return world.spawnEntity(new ItemEntity(world, pos.getX(), pos.getY(), pos.getZ(), diamond));
     })
             .addPool(LuckyEffectPools.DEFAULT, 1)
             .build();
-    public static final SimpleLuckyEffect DROP_KB_STICK = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "drop_kb_stick"), (world, pos, state, player) -> {
+    @SuppressWarnings("unused") public static final SimpleLuckyEffect DROP_KB_STICK = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "drop_kb_stick"), (world, pos, state, player) -> {
         ItemStack kb_stick = new ItemStack(Items.STICK);
         ItemEnchantmentsComponent.Builder builder = new ItemEnchantmentsComponent.Builder(ItemEnchantmentsComponent.DEFAULT);
         Optional<RegistryEntry.Reference<Enchantment>> optKnockback = world.getRegistryManager().get(RegistryKeys.ENCHANTMENT).getEntry(Enchantments.KNOCKBACK);
@@ -91,7 +91,7 @@ public class LuckyEffects {
     })
             .addPool(LuckyEffectPools.WEAPON, 1)
             .build();
-    public static final SimpleLuckyEffect DROP_WOOD_SWORD = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "drop_wood_sword"), ((world, pos, state, player) -> {
+    @SuppressWarnings("unused") public static final SimpleLuckyEffect DROP_WOOD_SWORD = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "drop_wood_sword"), ((world, pos, state, player) -> {
         ItemStack wood_sword = new ItemStack(Items.WOODEN_SWORD);
         ItemEnchantmentsComponent.Builder builder = new ItemEnchantmentsComponent.Builder(ItemEnchantmentsComponent.DEFAULT);
         Optional<RegistryEntry.Reference<Enchantment>> optSharpness = world.getRegistryManager().get(RegistryKeys.ENCHANTMENT).getEntry(Enchantments.SHARPNESS);
@@ -106,7 +106,7 @@ public class LuckyEffects {
     }))
             .addPool(LuckyEffectPools.WEAPON, 3)
             .build();
-    public static final SimpleLuckyEffect DROP_DIAMOND_SWORD = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "drop_diamond_sword"), ((world, pos, state, player) -> {
+    @SuppressWarnings("unused") public static final SimpleLuckyEffect DROP_DIAMOND_SWORD = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "drop_diamond_sword"), ((world, pos, state, player) -> {
         ItemStack diamond_sword = new ItemStack(Items.DIAMOND_SWORD);
         ItemEnchantmentsComponent.Builder builder = new ItemEnchantmentsComponent.Builder(ItemEnchantmentsComponent.DEFAULT);
         Optional<RegistryEntry.Reference<Enchantment>> optSilkTouch = world.getRegistryManager().get(RegistryKeys.ENCHANTMENT).getEntry(Enchantments.SILK_TOUCH);
@@ -123,38 +123,38 @@ public class LuckyEffects {
     }))
             .addPool(LuckyEffectPools.WEAPON, 30)
             .build();
-    public static final SimpleLuckyEffect SPAWN_SCALED_MOB = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "spawn_scaled_mob"), LuckyEffects::spawnScaledMob)
+    @SuppressWarnings("unused") public static final SimpleLuckyEffect SPAWN_SCALED_MOB = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "spawn_scaled_mob"), LuckyEffects::spawnScaledMob)
             .addPool(LuckyEffectPools.DEFAULT, 1)
             .build();
-    public static final SimpleLuckyEffect PLACE_CAGE = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "place_cage"), (world, pos, state, player) -> {
+    @SuppressWarnings("unused") public static final SimpleLuckyEffect PLACE_CAGE = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "place_cage"), (world, pos, state, player) -> {
         BlockPos structurePos = player.getBlockPos().west().north();
         return placeStructure(world, structurePos, structurePos, player, Identifier.of(MOD_ID, "cage"), false);
     })
             .addPool(LuckyEffectPools.DEFAULT, 1)
             .build();
-    public static final SimpleLuckyEffect PLACE_LAVA_CAGE = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "place_lava_cage"), LuckyEffects::placeLavaCage)
+    @SuppressWarnings("unused") public static final SimpleLuckyEffect PLACE_LAVA_CAGE = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "place_lava_cage"), LuckyEffects::placeLavaCage)
             .addPool(LuckyEffectPools.DEFAULT, 1)
             .build();
-    public static final SimpleLuckyEffect PLACE_CAKE = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "place_cake"), (world, pos, state, player) -> world.setBlockState(pos, Blocks.CAKE.getDefaultState()))
+    @SuppressWarnings("unused") public static final SimpleLuckyEffect PLACE_CAKE = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "place_cake"), (world, pos, state, player) -> world.setBlockState(pos, Blocks.CAKE.getDefaultState()))
             .addPool(LuckyEffectPools.DEFAULT, 0.3)
             .build();
-    public static final SimpleLuckyEffect PLACE_LIE_CAKE = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "place_lie_cake"), (world, pos, state, player) -> placeStructure(world, pos, pos, player, Identifier.of(MOD_ID, "lie_cake"), true))
+    @SuppressWarnings("unused") public static final SimpleLuckyEffect PLACE_LIE_CAKE = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "place_lie_cake"), (world, pos, state, player) -> placeStructure(world, pos, pos, player, Identifier.of(MOD_ID, "lie_cake"), true))
             .addPool(LuckyEffectPools.DEFAULT, 0.3)
             .build();
-    public static final SimpleLuckyEffect PLACE_TRUTH_CAKE = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "place_truth_cake"), (world, pos, state, player) -> placeStructure(world, pos, pos, player, Identifier.of(MOD_ID, "truth_cake"), true))
+    @SuppressWarnings("unused") public static final SimpleLuckyEffect PLACE_TRUTH_CAKE = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "place_truth_cake"), (world, pos, state, player) -> placeStructure(world, pos, pos, player, Identifier.of(MOD_ID, "truth_cake"), true))
             .addPool(LuckyEffectPools.DEFAULT, 0.3)
             .build();
-    public static final SimpleLuckyEffect PLACE_PARADOX_CAKE = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "place_paradox_cake"), (world, pos, state, player) -> placeStructure(world, pos, pos, player, Identifier.of(MOD_ID, "paradox_cake"), true))
+    @SuppressWarnings("unused") public static final SimpleLuckyEffect PLACE_PARADOX_CAKE = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "place_paradox_cake"), (world, pos, state, player) -> placeStructure(world, pos, pos, player, Identifier.of(MOD_ID, "paradox_cake"), true))
             .addPool(LuckyEffectPools.DEFAULT, 0.3)
             .build();
-    public static final SimpleLuckyEffect SUMMON_CHARGED_CREEPER = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "summon_charged_creeper"), (world, pos, state, player) -> {
+    @SuppressWarnings("unused") public static final SimpleLuckyEffect SUMMON_CHARGED_CREEPER = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "summon_charged_creeper"), (world, pos, state, player) -> {
         EntityType.CREEPER.spawn(world, pos, SpawnReason.COMMAND);
         EntityType.LIGHTNING_BOLT.spawn(world, pos.up(), SpawnReason.COMMAND);
         return true;
     })
             .addPool(LuckyEffectPools.DEFAULT, 1)
             .build();
-    public static final SimpleLuckyEffect SPAWN_SLIME_STACK = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "spawn_slime_stack"), (world, pos, state, player) -> spawnSlimeStack(world, pos, player.getRandom().nextBoolean(), player.getRandom().nextBoolean()))
+    @SuppressWarnings("unused") public static final SimpleLuckyEffect SPAWN_SLIME_STACK = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "spawn_slime_stack"), (world, pos, state, player) -> spawnSlimeStack(world, pos, player.getRandom().nextBoolean(), player.getRandom().nextBoolean()))
             .addPool(LuckyEffectPools.DEFAULT, 1)
             .build();
 
