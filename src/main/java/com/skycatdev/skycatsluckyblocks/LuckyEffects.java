@@ -134,9 +134,22 @@ public class LuckyEffects {
             .addPool(LuckyEffectPools.DEFAULT, 1)
             .build();
     public static final SimpleLuckyEffect PLACE_CAKE = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "place_cake"), (world, pos, state, player) -> world.setBlockState(pos, Blocks.CAKE.getDefaultState()))
-            .addPool(LuckyEffectPools.DEFAULT, 1)
+            .addPool(LuckyEffectPools.DEFAULT, 0.3)
             .build();
     public static final SimpleLuckyEffect PLACE_LIE_CAKE = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "place_lie_cake"), (world, pos, state, player) -> placeStructure(world, pos, pos, player, Identifier.of(MOD_ID, "lie_cake"), true))
+            .addPool(LuckyEffectPools.DEFAULT, 0.3)
+            .build();
+    public static final SimpleLuckyEffect PLACE_TRUTH_CAKE = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "place_truth_cake"), (world, pos, state, player) -> placeStructure(world, pos, pos, player, Identifier.of(MOD_ID, "truth_cake"), true))
+            .addPool(LuckyEffectPools.DEFAULT, 0.3)
+            .build();
+    public static final SimpleLuckyEffect PLACE_PARADOX_CAKE = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "place_paradox_cake"), (world, pos, state, player) -> placeStructure(world, pos, pos, player, Identifier.of(MOD_ID, "paradox_cake"), true))
+            .addPool(LuckyEffectPools.DEFAULT, 0.3)
+            .build();
+    public static final SimpleLuckyEffect SUMMON_CHARGED_CREEPER = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "summon_charged_creeper"), (world, pos, state, player) -> {
+        EntityType.CREEPER.spawn(world, pos, SpawnReason.COMMAND);
+        EntityType.LIGHTNING_BOLT.spawn(world, pos, SpawnReason.COMMAND);
+        return true;
+    })
             .addPool(LuckyEffectPools.DEFAULT, 1)
             .build();
 
