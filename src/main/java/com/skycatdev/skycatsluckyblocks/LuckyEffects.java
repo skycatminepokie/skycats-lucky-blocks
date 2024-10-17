@@ -22,6 +22,7 @@ import net.minecraft.entity.passive.IronGolemEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.filter.FilteredMessage;
@@ -203,6 +204,22 @@ public class LuckyEffects {
             creeper.startRiding(bat);
             world.spawnNewEntityAndPassengers(bat);
         }
+        return true;
+    })
+            .addPool(LuckyEffectPools.DEFAULT, 1)
+            .build();
+    @SuppressWarnings("unused") public static final SimpleLuckyEffect DROP_RANDOM_ENCHANTED_BOOK = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "drop_random_enchanted_book"), (world, pos, state, player) -> {
+        Registry<Enchantment> enchantRegistry = world.getRegistryManager().get(RegistryKeys.ENCHANTMENT);
+        var optEnchant = enchantRegistry.getRandom(player.getRandom());
+        if (optEnchant.isEmpty()) {
+            LOGGER.warn("Couldn't get a random enchant. Are there no enchants?! Skipping.");
+            return false;
+        }
+        ItemStack itemStack = new ItemStack(Items.ENCHANTED_BOOK);
+        itemStack.addEnchantment(optEnchant.get(), player.getRandom().nextBetween(1, 10));
+        ItemEntity itemEntity = new ItemEntity(world, pos.getX(), pos.getY(), pos.getZ(), itemStack);
+        itemEntity.setToDefaultPickupDelay();
+        world.spawnEntity(itemEntity);
         return true;
     })
             .addPool(LuckyEffectPools.DEFAULT, 1)
