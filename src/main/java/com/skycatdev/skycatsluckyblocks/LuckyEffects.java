@@ -225,16 +225,27 @@ public class LuckyEffects {
         //noinspection StatementWithEmptyBody
         while (i++ < extraEnchants && enchantRandomly(itemStack, world, player.getRandom(), 10)) { // Enchants the thing another extraEnchants times
         }
-        dropItemStack(itemStack, pos, world);
-        return true;
+        return dropItemStack(itemStack, pos, world);
+    })
+            .addPool(LuckyEffectPools.DEFAULT, 1)
+            .build();
+    @SuppressWarnings("unused") public static final SimpleLuckyEffect DROP_RANDOM_ENCHANTED_BOOK = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "drop_random_enchanted_book"), (world, pos, state, player) -> {
+        ItemStack itemStack = new ItemStack(Items.ENCHANTED_BOOK);
+        if (!enchantRandomly(itemStack, world, player.getRandom(), 10)) {
+            return false;
+        }
+        return dropItemStack(itemStack, pos, world);
     })
             .addPool(LuckyEffectPools.DEFAULT, 1)
             .build();
 
-    private static void dropItemStack(ItemStack itemStack, BlockPos pos, ServerWorld world) {
+    /**
+     * @return {@code true} on success
+     */
+    private static boolean dropItemStack(ItemStack itemStack, BlockPos pos, ServerWorld world) {
         ItemEntity itemEntity = new ItemEntity(world, pos.getX(), pos.getY(), pos.getZ(), itemStack);
         itemEntity.setToDefaultPickupDelay();
-        world.spawnEntity(itemEntity);
+        return world.spawnEntity(itemEntity);
     }
 
     /**
