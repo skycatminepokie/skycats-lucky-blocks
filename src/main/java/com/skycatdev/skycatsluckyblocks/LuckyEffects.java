@@ -223,7 +223,7 @@ public class LuckyEffects {
         int i = 0;
         int extraEnchants = player.getRandom().nextBetween(0, 14);
         //noinspection StatementWithEmptyBody
-        while (i++ < extraEnchants && enchantRandomly(itemStack, world, player.getRandom(), 10)) { // Enchants the thing another 9 times
+        while (i++ < extraEnchants && enchantRandomly(itemStack, world, player.getRandom(), 10)) { // Enchants the thing another extraEnchants times
         }
         dropItemStack(itemStack, pos, world);
         return true;
