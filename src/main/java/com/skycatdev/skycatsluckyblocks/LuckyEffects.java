@@ -3,6 +3,7 @@ package com.skycatdev.skycatsluckyblocks;
 import com.skycatdev.skycatsluckyblocks.impl.SimpleLuckyEffect;
 import com.skycatdev.skycatsluckyblocks.mixin.SaplingGeneratorMixin;
 import com.skycatdev.skycatsluckyblocks.mixin.SlimeEntityMixin;
+import net.fabricmc.fabric.api.tag.convention.v2.ConventionalItemTags;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.SaplingGenerator;
@@ -19,6 +20,7 @@ import net.minecraft.entity.boss.WitherEntity;
 import net.minecraft.entity.mob.CreeperEntity;
 import net.minecraft.entity.passive.BatEntity;
 import net.minecraft.entity.passive.IronGolemEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
@@ -208,22 +210,46 @@ public class LuckyEffects {
     })
             .addPool(LuckyEffectPools.DEFAULT, 1)
             .build();
-    @SuppressWarnings("unused") public static final SimpleLuckyEffect DROP_RANDOM_ENCHANTED_BOOK = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "drop_random_enchanted_book"), (world, pos, state, player) -> {
-        Registry<Enchantment> enchantRegistry = world.getRegistryManager().get(RegistryKeys.ENCHANTMENT);
-        var optEnchant = enchantRegistry.getRandom(player.getRandom());
-        if (optEnchant.isEmpty()) {
-            LOGGER.warn("Couldn't get a random enchant. Are there no enchants?! Skipping.");
+    @SuppressWarnings("unused") public static final SimpleLuckyEffect DROP_RANDOM_ENCHANTABLE = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "drop_random_enchantable"), (world, pos, state, player) -> {
+        Item sword = Utils.getRandomFromTag(Registries.ITEM, ConventionalItemTags.ENCHANTABLES, player.getRandom());
+        if (sword == null) {
+            LOGGER.warn("Couldn't find any swords, are tags broken?");
             return false;
         }
-        ItemStack itemStack = new ItemStack(Items.ENCHANTED_BOOK);
-        itemStack.addEnchantment(optEnchant.get(), player.getRandom().nextBetween(1, 10));
-        ItemEntity itemEntity = new ItemEntity(world, pos.getX(), pos.getY(), pos.getZ(), itemStack);
-        itemEntity.setToDefaultPickupDelay();
-        world.spawnEntity(itemEntity);
+        ItemStack itemStack = new ItemStack(sword);
+        if (!enchantRandomly(itemStack, world, player.getRandom(), 10)) {
+            return false;
+        }
+        int i = 0;
+        int extraEnchants = player.getRandom().nextBetween(0, 14);
+        //noinspection StatementWithEmptyBody
+        while (i++ < extraEnchants && enchantRandomly(itemStack, world, player.getRandom(), 10)) { // Enchants the thing another 9 times
+        }
+        dropItemStack(itemStack, pos, world);
         return true;
     })
             .addPool(LuckyEffectPools.DEFAULT, 1)
             .build();
+
+    private static void dropItemStack(ItemStack itemStack, BlockPos pos, ServerWorld world) {
+        ItemEntity itemEntity = new ItemEntity(world, pos.getX(), pos.getY(), pos.getZ(), itemStack);
+        itemEntity.setToDefaultPickupDelay();
+        world.spawnEntity(itemEntity);
+    }
+
+    /**
+     * @return {@code true} on success
+     */
+    private static boolean enchantRandomly(ItemStack itemStack, ServerWorld world, Random random, int maxLevel) {
+        Registry<Enchantment> enchantRegistry = world.getRegistryManager().get(RegistryKeys.ENCHANTMENT);
+        var optEnchant = enchantRegistry.getRandom(random);
+        if (optEnchant.isEmpty()) {
+            LOGGER.warn("Couldn't get a random enchant. Are there no enchants?!");
+            return false;
+        }
+        itemStack.addEnchantment(optEnchant.get(), random.nextBetween(1, maxLevel));
+        return true;
+    }
 
     private static void giveScaledName(LivingEntity livingEntity, double scale) {
         String entityTypeName = livingEntity.getType().getName().getString();
