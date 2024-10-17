@@ -40,6 +40,7 @@ import net.minecraft.util.math.*;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
 import net.minecraft.world.gen.structure.Structure;
+import org.apache.commons.lang3.function.Consumers;
 
 import java.util.List;
 import java.util.Optional;
@@ -166,7 +167,7 @@ public class LuckyEffects {
     @SuppressWarnings("unused") public static final SimpleLuckyEffect PLACE_TNT_CUBE = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "place_tnt_cube"), (world, pos, state, player) -> {
         placeStructure(world, pos, pos, player, Identifier.of(MOD_ID, "hollow_tnt_cube"), false);
         if (player.getRandom().nextBoolean()) {
-            TntEntity tnt = EntityType.TNT.create(world, (e) -> {}, pos.south().east().up(), SpawnReason.COMMAND, true, false);
+            TntEntity tnt = EntityType.TNT.create(world, Consumers.nop(), pos.south().east().up(), SpawnReason.COMMAND, true, false);
             if (tnt == null) {
                 return false;
             }
@@ -181,7 +182,7 @@ public class LuckyEffects {
             .addPool(LuckyEffectPools.DEFAULT, 1)
             .build();
     @SuppressWarnings("unused") public static final SimpleLuckyEffect SPAWN_LONG_FUSE_TNT = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "spawn_long_fuse_tnt"), (world, pos, state, player) -> {
-        TntEntity tnt = EntityType.TNT.create(world, (e) -> {}, pos, SpawnReason.COMMAND, false, false);
+        TntEntity tnt = EntityType.TNT.create(world, Consumers.nop(), pos, SpawnReason.COMMAND, false, false);
         if (tnt == null) {
             return false;
         }
@@ -194,8 +195,8 @@ public class LuckyEffects {
             .build();
     @SuppressWarnings("unused") public static final SimpleLuckyEffect SPAWN_CREEPERS_ON_BATS = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "spawn_creepers_on_bats"), (world, pos, state, player) -> {
         for (int i = 0; i < 3; i++) {
-            CreeperEntity creeper = EntityType.CREEPER.create(world, (e) -> {}, pos, SpawnReason.COMMAND, false, false);
-            BatEntity bat = EntityType.BAT.create(world, (e)-> {}, pos, SpawnReason.COMMAND, false, false);
+            CreeperEntity creeper = EntityType.CREEPER.create(world, Consumers.nop(), pos, SpawnReason.COMMAND, false, false);
+            BatEntity bat = EntityType.BAT.create(world, Consumers.nop(), pos, SpawnReason.COMMAND, false, false);
             if (creeper == null || bat == null) {
                 return i != 0; // If we haven't spawned yet, then whatever, try again. If we have, then just go with what we have
             }
@@ -206,31 +207,6 @@ public class LuckyEffects {
     })
             .addPool(LuckyEffectPools.DEFAULT, 1)
             .build();
-
-    private static boolean spawnSlimeStack(ServerWorld world, BlockPos pos, boolean inverted, boolean magma) {
-        int numberInStack = 5;
-        EntityType<?> entityType = magma ? EntityType.MAGMA_CUBE : EntityType.SLIME;
-
-        LivingEntity base = (LivingEntity) entityType.create(world, (e) -> {}, pos, SpawnReason.COMMAND, false, false);
-        if (base == null) {
-            return false;
-        }
-        base.getDataTracker().set(SlimeEntityMixin.getSLIME_SIZE(), inverted ? 1 : numberInStack);
-        base.setHealth(inverted ? 1 : numberInStack * 2);
-        LivingEntity top = base;
-        for (int i = 0; i < numberInStack - 1; i++) {
-            LivingEntity current = (LivingEntity) entityType.create(world, (e) -> {}, pos, SpawnReason.COMMAND, false, false);
-            if (current == null) {
-                return false;
-            }
-            int size = inverted ? i + 2 : numberInStack - (i + 1);
-            current.getDataTracker().set(SlimeEntityMixin.getSLIME_SIZE(), size);
-            current.setHealth((size) * 2); // Doesn't follow vanilla conventions, but it would get quite high quite fast if it did
-            current.startRiding(top);
-            top = current;
-        }
-        return world.spawnNewEntityAndPassengers(base);
-    }
 
     private static void giveScaledName(LivingEntity livingEntity, double scale) {
         String entityTypeName = livingEntity.getType().getName().getString();
@@ -410,6 +386,33 @@ public class LuckyEffects {
             entity.discard();
             return false;
         }
+    }
+
+    private static boolean spawnSlimeStack(ServerWorld world, BlockPos pos, boolean inverted, boolean magma) {
+        int numberInStack = 5;
+        EntityType<?> entityType = magma ? EntityType.MAGMA_CUBE : EntityType.SLIME;
+
+        LivingEntity base = (LivingEntity) entityType.create(world, (e) -> {
+        }, pos, SpawnReason.COMMAND, false, false);
+        if (base == null) {
+            return false;
+        }
+        base.getDataTracker().set(SlimeEntityMixin.getSLIME_SIZE(), inverted ? 1 : numberInStack);
+        base.setHealth(inverted ? 1 : numberInStack * 2);
+        LivingEntity top = base;
+        for (int i = 0; i < numberInStack - 1; i++) {
+            LivingEntity current = (LivingEntity) entityType.create(world, (e) -> {
+            }, pos, SpawnReason.COMMAND, false, false);
+            if (current == null) {
+                return false;
+            }
+            int size = inverted ? i + 2 : numberInStack - (i + 1);
+            current.getDataTracker().set(SlimeEntityMixin.getSLIME_SIZE(), size);
+            current.setHealth((size) * 2); // Doesn't follow vanilla conventions, but it would get quite high quite fast if it did
+            current.startRiding(top);
+            top = current;
+        }
+        return world.spawnNewEntityAndPassengers(base);
     }
 
     private static boolean spawnWither(ServerWorld world, BlockPos pos) {
