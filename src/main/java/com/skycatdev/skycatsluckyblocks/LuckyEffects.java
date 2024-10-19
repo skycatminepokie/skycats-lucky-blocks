@@ -4,11 +4,13 @@ import com.skycatdev.skycatsluckyblocks.impl.SimpleLuckyEffect;
 import com.skycatdev.skycatsluckyblocks.mixin.SaplingGeneratorMixin;
 import com.skycatdev.skycatsluckyblocks.mixin.SlimeEntityMixin;
 import net.fabricmc.fabric.api.tag.convention.v2.ConventionalItemTags;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.SaplingGenerator;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.SignBlockEntity;
+import net.minecraft.block.entity.SignText;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.ItemEnchantmentsComponent;
 import net.minecraft.enchantment.Enchantment;
@@ -28,7 +30,6 @@ import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.server.filter.FilteredMessage;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
@@ -47,7 +48,6 @@ import net.minecraft.world.gen.chunk.ChunkGenerator;
 import net.minecraft.world.gen.structure.Structure;
 import org.apache.commons.lang3.function.Consumers;
 
-import java.util.List;
 import java.util.Optional;
 
 import static com.skycatdev.skycatsluckyblocks.SkycatsLuckyBlocks.LOGGER;
@@ -343,7 +343,8 @@ public class LuckyEffects {
                             .with(Properties.ROTATION, RotationPropertyHelper.fromYaw(player.getYaw() + 180)));
             BlockEntity blockEntity = world.getBlockEntity(signPos);
             if (blockEntity instanceof SignBlockEntity signBlockEntity) {
-                signBlockEntity.tryChangeText(player, true, List.of(FilteredMessage.EMPTY, FilteredMessage.permitted("Look up")));
+                signBlockEntity.changeText(text -> new SignText().withMessage(1, Text.of("Look up")), true); // TODO: test
+                world.updateListeners(signBlockEntity.getPos(), signBlockEntity.getCachedState(), signBlockEntity.getCachedState(), Block.NOTIFY_ALL);
             } else {
                 LOGGER.warn("Couldn't set the text of the sign, as the block entity was either null or not a sign block entity :thinking:. Can't skip it at this point, so we'll go with it.");
             }
