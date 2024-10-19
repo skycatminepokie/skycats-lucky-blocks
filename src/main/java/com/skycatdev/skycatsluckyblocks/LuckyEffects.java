@@ -23,6 +23,8 @@ import net.minecraft.entity.mob.CreeperEntity;
 import net.minecraft.entity.mob.ZombieEntity;
 import net.minecraft.entity.passive.BatEntity;
 import net.minecraft.entity.passive.IronGolemEntity;
+import net.minecraft.entity.passive.TraderLlamaEntity;
+import net.minecraft.entity.passive.WanderingTraderEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -50,8 +52,7 @@ import org.apache.commons.lang3.function.Consumers;
 
 import java.util.Optional;
 
-import static com.skycatdev.skycatsluckyblocks.SkycatsLuckyBlocks.LOGGER;
-import static com.skycatdev.skycatsluckyblocks.SkycatsLuckyBlocks.MOD_ID;
+import static com.skycatdev.skycatsluckyblocks.SkycatsLuckyBlocks.*;
 
 public class LuckyEffects {
     @SuppressWarnings("unused") public static final SimpleLuckyEffect SAY_HI = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "say_hi"), (world, pos, state, player) -> {
@@ -259,6 +260,40 @@ public class LuckyEffects {
         bob.equipStack(EquipmentSlot.MAINHAND, sword);
         bob.setCustomName(Text.of("Bob"));
         return world.spawnNewEntityAndPassengers(bob);
+    })
+            .addPool(LuckyEffectPools.DEFAULT, 1)
+            .build();
+    @SuppressWarnings("unused") public static final SimpleLuckyEffect DROP_TWO_LUCKY_BLOCKS = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "drop_two_lucky_blocks"), (world, pos, state, player) -> {
+        dropItemStack(new ItemStack(LuckyBlocks.LUCKY_BLOCK, 2), pos, world);
+        return true;
+    })
+            .addPool(LuckyEffectPools.DEFAULT, 1)
+            .build();
+    @SuppressWarnings("unused") public static final SimpleLuckyEffect SPAWN_WANDERING_CARAVAN_WITH_SUPER_LLAMAS = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "spawn_wandering_caravan_with_super_llamas"), (world, pos, state, player) -> {
+        WanderingTraderEntity trader = EntityType.WANDERING_TRADER.create(world, Consumers.nop(), pos, SpawnReason.COMMAND, false, false);
+        if (trader == null) return false;
+        trader.setDespawnDelay(48000);
+        TraderLlamaEntity[] llamas = new TraderLlamaEntity[2];
+        for (int i = 0; i < 2; i++) {
+            llamas[i] = EntityType.TRADER_LLAMA.create(world, Consumers.nop(), pos, SpawnReason.COMMAND, false, false);
+            if (llamas[i] == null) return false;
+
+            EntityAttributeInstance maxHealth = llamas[i].getAttributeInstance(EntityAttributes.GENERIC_MAX_HEALTH);
+            if (maxHealth == null) return false;
+            maxHealth.setBaseValue(250);
+            llamas[i].setHealth(250);
+
+            //noinspection UnstableApiUsage
+            llamas[i].setAttached(SUPER_LLAMA_ATTACHMENT, Boolean.TRUE);
+
+            llamas[i].attachLeash(trader, true);
+            llamas[i].setCustomName(Text.of("Super ").copy().append(EntityType.TRADER_LLAMA.getName())); // TODO: Localize
+        }
+        world.spawnNewEntityAndPassengers(trader);
+        for (int i = 0; i < 2; i++) {
+            world.spawnNewEntityAndPassengers(llamas[i]);
+        }
+        return true;
     })
             .addPool(LuckyEffectPools.DEFAULT, 1)
             .build();
