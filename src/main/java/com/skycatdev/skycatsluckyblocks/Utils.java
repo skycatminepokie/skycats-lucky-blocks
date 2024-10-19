@@ -6,7 +6,7 @@ import net.minecraft.util.math.random.Random;
 import org.jetbrains.annotations.Nullable;
 
 public class Utils {
-    public static <T> @Nullable T getRandomFromTag(Registry<T> registry, TagKey<T> tag, Random random) {
+    public static <T> @Nullable T getRandomFromTag(Registry<T> registry, TagKey<T> tag, Random random) { // TODO: Make sure disabled stuff (from experiments) doesn't get in here
         var optEntryList = registry.getEntryList(tag);
         if (optEntryList.isEmpty()) return null;
         var entryList = optEntryList.get();

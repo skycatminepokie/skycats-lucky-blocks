@@ -18,6 +18,7 @@ import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.boss.WitherEntity;
 import net.minecraft.entity.mob.CreeperEntity;
+import net.minecraft.entity.mob.ZombieEntity;
 import net.minecraft.entity.passive.BatEntity;
 import net.minecraft.entity.passive.IronGolemEntity;
 import net.minecraft.item.Item;
@@ -39,6 +40,7 @@ import net.minecraft.structure.StructureTemplate;
 import net.minecraft.text.Text;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.ItemScatterer;
 import net.minecraft.util.math.*;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
@@ -217,15 +219,12 @@ public class LuckyEffects {
             return false;
         }
         ItemStack itemStack = new ItemStack(sword);
-        if (!enchantRandomly(itemStack, world, player.getRandom(), 10)) {
+        if (enchantRandomly(itemStack, world, player.getRandom(), 10, player.getRandom().nextBetween(1, 15))) {
+            dropItemStack(itemStack, pos, world);
+        } else {
             return false;
         }
-        int i = 0;
-        int extraEnchants = player.getRandom().nextBetween(0, 14);
-        //noinspection StatementWithEmptyBody
-        while (i++ < extraEnchants && enchantRandomly(itemStack, world, player.getRandom(), 10)) { // Enchants the thing another extraEnchants times
-        }
-        return dropItemStack(itemStack, pos, world);
+        return true;
     })
             .addPool(LuckyEffectPools.DEFAULT, 1)
             .build();
@@ -234,18 +233,38 @@ public class LuckyEffects {
         if (!enchantRandomly(itemStack, world, player.getRandom(), 10)) {
             return false;
         }
-        return dropItemStack(itemStack, pos, world);
+        dropItemStack(itemStack, pos, world);
+        return true;
+    })
+            .addPool(LuckyEffectPools.DEFAULT, 1)
+            .build();
+    @SuppressWarnings("unused") public static final SimpleLuckyEffect SPAWN_BOB = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "spawn_bob"), (world, pos, state, player) -> {
+        ItemStack helmet = new ItemStack(Items.DIAMOND_HELMET);
+        if (!enchantRandomly(helmet, world, player.getRandom(), 10, 10)) return false;
+        ItemStack chestplate = new ItemStack(Items.DIAMOND_CHESTPLATE);
+        if (!enchantRandomly(chestplate, world, player.getRandom(), 10, 10)) return false;
+        ItemStack leggings = new ItemStack(Items.DIAMOND_LEGGINGS);
+        if (!enchantRandomly(leggings, world, player.getRandom(), 10, 10)) return false;
+        ItemStack boots = new ItemStack(Items.DIAMOND_BOOTS);
+        if (!enchantRandomly(boots, world, player.getRandom(), 10, 10)) return false;
+        ItemStack sword = new ItemStack(Items.DIAMOND_SWORD);
+        if (!enchantRandomly(sword, world, player.getRandom(), 10, 10)) return false;
+
+        ZombieEntity bob = EntityType.ZOMBIE.create(world, Consumers.nop(), pos, SpawnReason.COMMAND, false, false);
+        if (bob == null) return false;
+        bob.equipStack(EquipmentSlot.HEAD, helmet);
+        bob.equipStack(EquipmentSlot.CHEST, chestplate);
+        bob.equipStack(EquipmentSlot.LEGS, leggings);
+        bob.equipStack(EquipmentSlot.FEET, boots);
+        bob.equipStack(EquipmentSlot.MAINHAND, sword);
+        bob.setCustomName(Text.of("Bob"));
+        return world.spawnNewEntityAndPassengers(bob);
     })
             .addPool(LuckyEffectPools.DEFAULT, 1)
             .build();
 
-    /**
-     * @return {@code true} on success
-     */
-    private static boolean dropItemStack(ItemStack itemStack, BlockPos pos, ServerWorld world) {
-        ItemEntity itemEntity = new ItemEntity(world, pos.getX(), pos.getY(), pos.getZ(), itemStack);
-        itemEntity.setToDefaultPickupDelay();
-        return world.spawnEntity(itemEntity);
+    private static void dropItemStack(ItemStack itemStack, BlockPos pos, ServerWorld world) {
+        ItemScatterer.spawn(world, pos.getX(), pos.getY(), pos.getZ(), itemStack);
     }
 
     /**
@@ -259,6 +278,18 @@ public class LuckyEffects {
             return false;
         }
         itemStack.addEnchantment(optEnchant.get(), random.nextBetween(1, maxLevel));
+        return true;
+    }
+
+    /**
+     * @return {code true} iff all enchants were applied. Note that even if this returns {@code false}, some enchants may have been applied.
+     */
+    private static boolean enchantRandomly(ItemStack itemStack, ServerWorld world, Random random, int maxLevel, int times) {
+        for (int i = 0; i < times; i++) {
+            if (!enchantRandomly(itemStack, world, random, maxLevel)) {
+                return false;
+            }
+        }
         return true;
     }
 
