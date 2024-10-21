@@ -54,7 +54,7 @@ import java.util.Optional;
 
 import static com.skycatdev.skycatsluckyblocks.SkycatsLuckyBlocks.*;
 
-public class LuckyEffects {
+public class LuckyEffects { // TODO: Move adding pools to LuckyPools
     @SuppressWarnings("unused") public static final SimpleLuckyEffect SAY_HI = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "say_hi"), (world, pos, state, player) -> {
         player.sendMessage(Text.of("[Lucky Block] Hi")); // TODO: Localize
         return true;
@@ -293,6 +293,13 @@ public class LuckyEffects {
         for (int i = 0; i < 2; i++) {
             world.spawnNewEntityAndPassengers(llamas[i]);
         }
+        return true;
+    })
+            .addPool(LuckyEffectPools.DEFAULT, 1)
+            .build();
+    @SuppressWarnings("unused") public static final SimpleLuckyEffect PLACE_DIAMOND_BLOCK = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "place_diamond_block"), (world, pos, state, player) -> {
+        world.setBlockState(pos, Blocks.DIAMOND_BLOCK.getDefaultState());
+        world.playSound(null, pos, SoundEvents.BLOCK_AMETHYST_BLOCK_BREAK, SoundCategory.BLOCKS, 1, 1);
         return true;
     })
             .addPool(LuckyEffectPools.DEFAULT, 1)
