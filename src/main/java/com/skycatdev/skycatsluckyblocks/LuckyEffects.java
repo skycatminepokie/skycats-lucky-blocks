@@ -304,6 +304,9 @@ public class LuckyEffects { // TODO: Move adding pools to LuckyPools
     })
             .addPool(LuckyEffectPools.DEFAULT, 1)
             .build();
+    public static final SimpleLuckyEffect PLACE_DOOR_TRAP = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "place_door_trap"), (world, pos, state, player) -> placeStructure(world, pos, pos, player, Identifier.of(MOD_ID, "door_trap"), false))
+            .addPool(LuckyEffectPools.DEFAULT, 1)
+            .build();
 
     private static void dropItemStack(ItemStack itemStack, BlockPos pos, ServerWorld world) {
         ItemScatterer.spawn(world, pos.getX(), pos.getY(), pos.getZ(), itemStack);
