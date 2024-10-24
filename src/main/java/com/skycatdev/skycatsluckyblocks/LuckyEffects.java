@@ -56,12 +56,25 @@ import static com.skycatdev.skycatsluckyblocks.SkycatsLuckyBlocks.*;
 
 public class LuckyEffects { // TODO: Move adding pools to LuckyPools
     @SuppressWarnings("unused") public static final SimpleLuckyEffect SAY_HI = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "say_hi"), (world, pos, state, player) -> {
-        player.sendMessage(Text.of("[Lucky Block] Hi")); // TODO: Localize
+        player.sendMessage(Text.translatable(SkycatsLuckyBlocks.MOD_ID + ".effect.say_hi.hi", state.getBlock().getName().getString()));
         return true;
     })
             .addPool(LuckyEffectPools.DEFAULT, 0.1)
             .build();
-    @SuppressWarnings("unused") public static final SimpleLuckyEffect SPAWN_IRON_GOLEM = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "spawn_iron_golem"), (world, pos, state, player) -> spawnIronGolem(world, pos, player, player.getRandom().nextBoolean()))
+    @SuppressWarnings("unused") public static final SimpleLuckyEffect SPAWN_IRON_GOLEM = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "spawn_iron_golem"), (world, pos, state, player) -> {
+        boolean angry = player.getRandom().nextBoolean();
+        IronGolemEntity golem = EntityType.IRON_GOLEM.spawn(world, pos, SpawnReason.COMMAND);
+        if (golem != null) {
+            golem.playSound(SoundEvents.ENTITY_IRON_GOLEM_REPAIR);
+            if (angry) {
+                golem.setAngryAt(player.getUuid());
+            }
+            return true;
+        } else {
+            LOGGER.warn(Text.translatable(MOD_ID + ".effect.spawn_iron_golem.failed").getString());
+            return false;
+        }
+    })
             .addPool(LuckyEffectPools.DEFAULT, 0.3)
             .build();
     @SuppressWarnings("unused") public static final SimpleLuckyEffect RANDOM_TREE = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "random_tree"), ((world, pos, state, player) -> {
@@ -72,15 +85,73 @@ public class LuckyEffects { // TODO: Move adding pools to LuckyPools
     }))
             .addPool(LuckyEffectPools.DEFAULT, 1)
             .build();
-    @SuppressWarnings("unused") public static final SimpleLuckyEffect PLACE_STRUCTURE = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "place_structure"), LuckyEffects::placeRandomStructure)
+    @SuppressWarnings("unused") public static final SimpleLuckyEffect PLACE_STRUCTURE = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "place_structure"), (world, pos, state, player) -> {
+        // A lot of this comes from PlaceCommand#executePlaceStructure
+        var optStructure = world.getRegistryManager().get(RegistryKeys.STRUCTURE).getRandom(player.getRandom());
+        if (optStructure.isEmpty()) {
+            LOGGER.warn(Text.translatable(MOD_ID + ".effect.place_structure.no_structures").getString());
+            return false;
+        }
+        Structure structure = optStructure.get().value();
+        ChunkGenerator chunkGenerator = world.getChunkManager().getChunkGenerator();
+        StructureStart structureStart = structure.createStructureStart(
+                world.getRegistryManager(),
+                chunkGenerator,
+                chunkGenerator.getBiomeSource(),
+                world.getChunkManager().getNoiseConfig(),
+                world.getStructureTemplateManager(),
+                world.getSeed(),
+                new ChunkPos(pos),
+                0,
+                world,
+                (biome) -> true
+        );
+        if (!structureStart.hasChildren()) {
+            LOGGER.info(Text.translatable(MOD_ID + ".effect.place_structure.no_children").getString());
+            return false;
+        }
+        BlockBox boundingBox = structureStart.getBoundingBox();
+        ChunkPos minCorner = new ChunkPos(ChunkSectionPos.getSectionCoord(boundingBox.getMinX()), ChunkSectionPos.getSectionCoord(boundingBox.getMinZ()));
+        ChunkPos maxCorner = new ChunkPos(ChunkSectionPos.getSectionCoord(boundingBox.getMaxX()), ChunkSectionPos.getSectionCoord(boundingBox.getMaxZ()));
+
+        if (ChunkPos.stream(minCorner, maxCorner).anyMatch(chunk -> !world.canSetBlock(chunk.getStartPos()))) {
+            LOGGER.info(Text.translatable(MOD_ID + ".effect.place_structure.not_loaded").getString());
+            return false;
+        }
+
+        ChunkPos.stream(minCorner, maxCorner).forEach(
+                chunk -> structureStart.place(
+                        world,
+                        world.getStructureAccessor(),
+                        chunkGenerator,
+                        world.getRandom(),
+                        new BlockBox(chunk.getStartX(), world.getBottomY(), chunk.getStartZ(), chunk.getEndX(), world.getTopY(), chunk.getEndZ()),
+                        chunk)
+        );
+        player.sendMessage(Text.translatable(MOD_ID + ".effect.place_structure.notification")); // TODO: Localize
+        return true;
+    })
             .addPool(LuckyEffectPools.DEFAULT, 0.1)
             .build();
-    @SuppressWarnings("unused") public static final SimpleLuckyEffect SPAWN_WITHER = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "spawn_wither"), (world, pos, state, player) -> spawnWither(world, pos))
+    @SuppressWarnings("unused") public static final SimpleLuckyEffect SPAWN_WITHER = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "spawn_wither"), (world, pos, state, player) -> {
+        WitherEntity wither = EntityType.WITHER.spawn(world, pos, SpawnReason.CONVERSION);
+        if (wither != null) {
+            wither.playSound(SoundEvents.ENTITY_WITHER_SPAWN);
+            wither.setHealth(500f);
+            wither.setCustomName(Text.translatable(MOD_ID + ".effect.spawn_wither.name"));
+            LOGGER.info(Text.translatable(MOD_ID + ".effect.spawn_wither.log").getString());
+            return true;
+        } else {
+            LOGGER.warn(Text.translatable(MOD_ID + ".effect.spawn_wither.failed").getString());
+            return false;
+        }
+
+    })
             .addPool(LuckyEffectPools.WITHER, 1)
             .build();
     @SuppressWarnings("unused") public static final SimpleLuckyEffect DROP_DIAMOND = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "drop_diamond"), (world, pos, state, player) -> {
         ItemStack diamond = new ItemStack(Items.DIAMOND);
-        diamond.set(DataComponentTypes.CUSTOM_NAME, Text.of("Not a diamund"));
+        diamond.set(DataComponentTypes.CUSTOM_NAME, Text.translatable(SkycatsLuckyBlocks.MOD_ID + ".effect.drop_diamond.name"));
         return world.spawnEntity(new ItemEntity(world, pos.getX(), pos.getY(), pos.getZ(), diamond));
     })
             .addPool(LuckyEffectPools.DEFAULT, 1)
@@ -90,7 +161,7 @@ public class LuckyEffects { // TODO: Move adding pools to LuckyPools
         ItemEnchantmentsComponent.Builder builder = new ItemEnchantmentsComponent.Builder(ItemEnchantmentsComponent.DEFAULT);
         Optional<RegistryEntry.Reference<Enchantment>> optKnockback = world.getRegistryManager().get(RegistryKeys.ENCHANTMENT).getEntry(Enchantments.KNOCKBACK);
         if (optKnockback.isEmpty()) {
-            LOGGER.warn("Knockback enchantment didn't exist? Skipping DROP_KB_STICK.");
+            LOGGER.warn(Text.translatable(SkycatsLuckyBlocks.MOD_ID + ".effect.drop_kb_stick.no_kb").getString());
             return false;
         }
 
@@ -107,7 +178,7 @@ public class LuckyEffects { // TODO: Move adding pools to LuckyPools
         ItemEnchantmentsComponent.Builder builder = new ItemEnchantmentsComponent.Builder(ItemEnchantmentsComponent.DEFAULT);
         Optional<RegistryEntry.Reference<Enchantment>> optSharpness = world.getRegistryManager().get(RegistryKeys.ENCHANTMENT).getEntry(Enchantments.SHARPNESS);
         if (optSharpness.isEmpty()) {
-            LOGGER.warn("Your blade is dull (._.), skipping DROP_WOOD_SWORD");
+            LOGGER.warn(Text.translatable(SkycatsLuckyBlocks.MOD_ID + ".effect.drop_wood_sword.no_sharpness").getString());
             return false;
         }
         builder.add(optSharpness.get(), 10);
@@ -123,12 +194,12 @@ public class LuckyEffects { // TODO: Move adding pools to LuckyPools
         ItemEnchantmentsComponent.Builder builder = new ItemEnchantmentsComponent.Builder(ItemEnchantmentsComponent.DEFAULT);
         Optional<RegistryEntry.Reference<Enchantment>> optSilkTouch = world.getRegistryManager().get(RegistryKeys.ENCHANTMENT).getEntry(Enchantments.SILK_TOUCH);
         if (optSilkTouch.isEmpty()) {
-            LOGGER.warn("Silk touch has been deleted, send help, couldn't give you the garbage. Failed DROP_DIAMOND_SWORD");
+            LOGGER.warn(Text.translatable(SkycatsLuckyBlocks.MOD_ID + ".effect.drop_diamond_sword.no_silk_touch").getString());
             return false;
         }
         builder.add(optSilkTouch.get(), 2);
 
-        diamond_sword.set(DataComponentTypes.CUSTOM_NAME, Text.of("It's Garbage"));
+        diamond_sword.set(DataComponentTypes.CUSTOM_NAME, Text.translatable(SkycatsLuckyBlocks.MOD_ID + ".effect.drop_diamond_sword.name"));
         diamond_sword.set(DataComponentTypes.ENCHANTMENTS,
                 builder.build());
         return world.spawnEntity(new ItemEntity(world, pos.getX(), pos.getY(), pos.getZ(), diamond_sword));
@@ -214,12 +285,12 @@ public class LuckyEffects { // TODO: Move adding pools to LuckyPools
             .addPool(LuckyEffectPools.DEFAULT, 1)
             .build();
     @SuppressWarnings("unused") public static final SimpleLuckyEffect DROP_RANDOM_ENCHANTABLE = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "drop_random_enchantable"), (world, pos, state, player) -> {
-        Item sword = Utils.getRandomFromTag(Registries.ITEM, ConventionalItemTags.ENCHANTABLES, player.getRandom());
-        if (sword == null) {
-            LOGGER.warn("Couldn't find any swords, are tags broken?");
+        Item enchantable = Utils.getRandomFromTag(Registries.ITEM, ConventionalItemTags.ENCHANTABLES, player.getRandom());
+        if (enchantable == null) {
+            LOGGER.warn(Text.translatable(SkycatsLuckyBlocks.MOD_ID + ".effect.drop_random_enchantable.no_enchantables").getString());
             return false;
         }
-        ItemStack itemStack = new ItemStack(sword);
+        ItemStack itemStack = new ItemStack(enchantable);
         if (enchantRandomly(itemStack, world, player.getRandom(), 10, player.getRandom().nextBetween(1, 15))) {
             dropItemStack(itemStack, pos, world);
         } else {
@@ -258,7 +329,7 @@ public class LuckyEffects { // TODO: Move adding pools to LuckyPools
         bob.equipStack(EquipmentSlot.LEGS, leggings);
         bob.equipStack(EquipmentSlot.FEET, boots);
         bob.equipStack(EquipmentSlot.MAINHAND, sword);
-        bob.setCustomName(Text.of("Bob"));
+        bob.setCustomName(Text.translatable(MOD_ID + ".effect.spawn_bob.bob"));
         return world.spawnNewEntityAndPassengers(bob);
     })
             .addPool(LuckyEffectPools.DEFAULT, 1)
@@ -287,7 +358,7 @@ public class LuckyEffects { // TODO: Move adding pools to LuckyPools
             llamas[i].setAttached(SUPER_LLAMA_ATTACHMENT, Boolean.TRUE);
 
             llamas[i].attachLeash(trader, true);
-            llamas[i].setCustomName(Text.of("Super ").copy().append(EntityType.TRADER_LLAMA.getName())); // TODO: Localize
+            llamas[i].setCustomName(Text.translatable(SkycatsLuckyBlocks.MOD_ID + ".effect.spawn_wandering_caravan_with_super_llamas.llama_name", EntityType.TRADER_LLAMA.getName().getString()));
         }
         world.spawnNewEntityAndPassengers(trader);
         for (int i = 0; i < 2; i++) {
@@ -319,7 +390,7 @@ public class LuckyEffects { // TODO: Move adding pools to LuckyPools
         Registry<Enchantment> enchantRegistry = world.getRegistryManager().get(RegistryKeys.ENCHANTMENT);
         var optEnchant = enchantRegistry.getRandom(random);
         if (optEnchant.isEmpty()) {
-            LOGGER.warn("Couldn't get a random enchant. Are there no enchants?!");
+            LOGGER.warn(Text.translatable(MOD_ID + ".enchant_randomly.no_enchants").getString());
             return false;
         }
         itemStack.addEnchantment(optEnchant.get(), random.nextBetween(1, maxLevel));
@@ -341,37 +412,37 @@ public class LuckyEffects { // TODO: Move adding pools to LuckyPools
     private static void giveScaledName(LivingEntity livingEntity, double scale) {
         String entityTypeName = livingEntity.getType().getName().getString();
         if (scale <= 0.6) {
-            livingEntity.setCustomName(Text.of("Smol " + entityTypeName));
+            livingEntity.setCustomName(Text.translatable(MOD_ID + ".give_scaled_name.smallest", entityTypeName));
             return;
         }
         if (scale <= 0.75) {
-            livingEntity.setCustomName(Text.of("Small " + entityTypeName));
+            livingEntity.setCustomName(Text.translatable(MOD_ID + ".give_scaled_name.small", entityTypeName));
             return;
         }
         if (scale < 0.99) {
-            livingEntity.setCustomName(Text.of("Slightly Small " + entityTypeName));
+            livingEntity.setCustomName(Text.translatable(MOD_ID + ".give_scaled_name.slightly_small", entityTypeName));
             return;
         }
         if (scale < 1) {
-            livingEntity.setCustomName(Text.of("Uncomfortably Small " + entityTypeName));
+            livingEntity.setCustomName(Text.translatable(MOD_ID + ".give_scaled_name.barely_small", entityTypeName));
             return;
         }
         if (scale == 1) {
-            livingEntity.setCustomName(Text.of("Incredibly Uncommon Regular-Sized " + entityTypeName));
+            livingEntity.setCustomName(Text.translatable(MOD_ID + ".give_scaled_name.regular", entityTypeName));
             return;
         }
         if (scale <= 1.01) {
-            livingEntity.setCustomName(Text.of("Uncomfortably Large " + entityTypeName));
+            livingEntity.setCustomName(Text.translatable(MOD_ID + ".give_scaled_name.barely_big", entityTypeName));
         }
         if (scale <= 1.1) {
-            livingEntity.setCustomName(Text.of("Slightly Large " + entityTypeName));
+            livingEntity.setCustomName(Text.translatable(MOD_ID + ".give_scaled_name.slightly_big", entityTypeName));
             return;
         }
         if (scale <= 1.4) {
-            livingEntity.setCustomName(Text.of("Large " + entityTypeName));
+            livingEntity.setCustomName(Text.translatable(MOD_ID + ".give_scaled_name.big", entityTypeName));
             return;
         }
-        livingEntity.setCustomName(Text.of("Chonky " + entityTypeName));
+        livingEntity.setCustomName(Text.translatable(MOD_ID + ".give_scaled_name.biggest", entityTypeName));
     }
 
     public static void init() {
@@ -388,60 +459,13 @@ public class LuckyEffects { // TODO: Move adding pools to LuckyPools
                             .with(Properties.ROTATION, RotationPropertyHelper.fromYaw(player.getYaw() + 180)));
             BlockEntity blockEntity = world.getBlockEntity(signPos);
             if (blockEntity instanceof SignBlockEntity signBlockEntity) {
-                signBlockEntity.changeText(text -> new SignText().withMessage(1, Text.of("Look up")), true); // TODO: test
+                signBlockEntity.changeText(text -> new SignText().withMessage(1, Text.translatable(MOD_ID + ".place_lava_cage.sign")), true);
                 world.updateListeners(signBlockEntity.getPos(), signBlockEntity.getCachedState(), signBlockEntity.getCachedState(), Block.NOTIFY_ALL);
             } else {
-                LOGGER.warn("Couldn't set the text of the sign, as the block entity was either null or not a sign block entity :thinking:. Can't skip it at this point, so we'll go with it.");
+                LOGGER.warn(Text.translatable(MOD_ID + ".place_lava_cage.failed_set_text").getString());
             }
         }
         return success;
-    }
-
-    private static boolean placeRandomStructure(ServerWorld world, BlockPos pos, BlockState state, ServerPlayerEntity player) {
-        // A lot of this comes from PlaceCommand#executePlaceStructure
-        var optStructure = world.getRegistryManager().get(RegistryKeys.STRUCTURE).getRandom(player.getRandom());
-        if (optStructure.isEmpty()) {
-            LOGGER.warn("Couldn't place a structure, there are no structures!");
-            return false;
-        }
-        Structure structure = optStructure.get().value();
-        ChunkGenerator chunkGenerator = world.getChunkManager().getChunkGenerator();
-        StructureStart structureStart = structure.createStructureStart(
-                world.getRegistryManager(),
-                chunkGenerator,
-                chunkGenerator.getBiomeSource(),
-                world.getChunkManager().getNoiseConfig(),
-                world.getStructureTemplateManager(),
-                world.getSeed(),
-                new ChunkPos(pos),
-                0,
-                world,
-                (biome) -> true
-        );
-        if (!structureStart.hasChildren()) {
-            LOGGER.info("Couldn't place a structure, the start doesn't have any children to place.");
-            return false;
-        }
-        BlockBox boundingBox = structureStart.getBoundingBox();
-        ChunkPos minCorner = new ChunkPos(ChunkSectionPos.getSectionCoord(boundingBox.getMinX()), ChunkSectionPos.getSectionCoord(boundingBox.getMinZ()));
-        ChunkPos maxCorner = new ChunkPos(ChunkSectionPos.getSectionCoord(boundingBox.getMaxX()), ChunkSectionPos.getSectionCoord(boundingBox.getMaxZ()));
-
-        if (ChunkPos.stream(minCorner, maxCorner).anyMatch(chunk -> !world.canSetBlock(chunk.getStartPos()))) {
-            LOGGER.info("Couldn't place a structure, not everything was loaded.");
-            return false;
-        }
-
-        ChunkPos.stream(minCorner, maxCorner).forEach(
-                chunk -> structureStart.place(
-                        world,
-                        world.getStructureAccessor(),
-                        chunkGenerator,
-                        world.getRandom(),
-                        new BlockBox(chunk.getStartX(), world.getBottomY(), chunk.getStartZ(), chunk.getEndX(), world.getTopY(), chunk.getEndZ()),
-                        chunk)
-        );
-        player.sendMessage(Text.of("[").copy().append(state.getBlock().getName()).append("] I built something for you! Take a look around.")); // TODO: Localize
-        return true;
     }
 
     /**
@@ -458,7 +482,7 @@ public class LuckyEffects { // TODO: Move adding pools to LuckyPools
     private static boolean placeStructure(ServerWorld world, BlockPos pos, BlockPos pivot, ServerPlayerEntity player, Identifier structure, boolean rotate) {
         Optional<StructureTemplate> optTemplate = world.getStructureTemplateManager().getTemplate(structure);
         if (optTemplate.isEmpty()) {
-            LOGGER.warn("Couldn't find structure {}. Skipping.", structure);
+            LOGGER.warn(Text.translatable(MOD_ID + ".place_structure.no_structure", structure.toString()).getString());
             return false;
         }
         StructurePlacementData placementData = new StructurePlacementData();
@@ -478,24 +502,10 @@ public class LuckyEffects { // TODO: Move adding pools to LuckyPools
         };
     }
 
-    private static boolean spawnIronGolem(ServerWorld world, BlockPos pos, ServerPlayerEntity player, boolean angry) {
-        IronGolemEntity golem = EntityType.IRON_GOLEM.spawn(world, pos, SpawnReason.COMMAND);
-        if (golem != null) {
-            golem.playSound(SoundEvents.ENTITY_IRON_GOLEM_REPAIR);
-            if (angry) {
-                golem.setAngryAt(player.getUuid());
-            }
-            return true;
-        } else {
-            LOGGER.warn("Couldn't spawn a golem for spawn_iron_golem effect");
-            return false;
-        }
-    }
-
     private static boolean spawnScaledMob(ServerWorld world, BlockPos pos, BlockState state, ServerPlayerEntity player) {
         EntityType<?> entityType = Utils.getRandomFromTag(Registries.ENTITY_TYPE, SkycatsLuckyBlocksTags.SPAWN_SCALED_MOB_MOBS, player.getRandom());
         if (entityType == null) {
-            LOGGER.warn("Couldn't get a random mob from SPAWN_SCALED_MOB_MOBS, is it empty?");
+            LOGGER.warn(Text.translatable(MOD_ID + ".spawn_scaled_mob.empty").getString());
             return false;
         }
         Entity entity = entityType.create(world, e -> {
@@ -503,17 +513,17 @@ public class LuckyEffects { // TODO: Move adding pools to LuckyPools
         if (entity instanceof LivingEntity livingEntity) {
             EntityAttributeInstance attribute = livingEntity.getAttributeInstance(EntityAttributes.GENERIC_SCALE);
             if (attribute == null) {
-                LOGGER.warn("Random mob from SPAWN_SCALED_MOB_MOBS \"{}\" has no scale attribute!", entity.getName().getString());
+                LOGGER.warn(Text.translatable(MOD_ID + ".spawn_scaled_mob.no_attribute", entity.getName().getString()).getString());
                 entity.discard();
                 return false;
             }
-            double scale = new java.util.Random(player.getRandom().nextLong()).nextDouble(0.5, 1.5); // TODO: possibly could be optimized by not creating the random
+            double scale = new java.util.Random(player.getRandom().nextLong()).nextDouble(0.5, 1.5); // TODO: possibly could be micro-optimized by not creating the random
             attribute.setBaseValue(scale);
             giveScaledName(livingEntity, scale);
             world.spawnNewEntityAndPassengers(livingEntity);
             return true;
         } else {
-            LOGGER.warn("Random mob from SPAWN_SCALED_MOB_MOBS \"{}\" was not a LivingEntity and it must be!", entity.getName().getString());
+            LOGGER.warn(Text.translatable(MOD_ID + ".spawn_scaled_mob.not_living_entity", entity.getName().getString()).getString());
             entity.discard();
             return false;
         }
@@ -544,21 +554,6 @@ public class LuckyEffects { // TODO: Move adding pools to LuckyPools
             top = current;
         }
         return world.spawnNewEntityAndPassengers(base);
-    }
-
-    private static boolean spawnWither(ServerWorld world, BlockPos pos) {
-        WitherEntity wither = EntityType.WITHER.spawn(world, pos, SpawnReason.CONVERSION);
-        if (wither != null) {
-            wither.playSound(SoundEvents.ENTITY_WITHER_SPAWN);
-            wither.setHealth(500f);
-            wither.setCustomName(Text.of("Flying Warden that can see"));
-            LOGGER.info("Spawned a wither");
-            return true;
-        } else {
-            LOGGER.warn("Couldn't spawn a wither for spawn_wither effect");
-            return false;
-        }
-
     }
 
 }
