@@ -1,5 +1,6 @@
 {
   "block.skycats-lucky-blocks.lucky_block": "Lucky Block",
+  "itemGroup.skycats-lucky-blocks.lucky_blocks": "Lucky Blocks",
   "skycats-lucky-blocks.effect.drop_diamond.name": "Not a diamund",
   "skycats-lucky-blocks.effect.drop_diamond_sword.name": "Garbage",
   "skycats-lucky-blocks.effect.drop_diamond_sword.no_silk_touch": "Silk touch has been deleted, send help, couldn't give you the garbage. Failed DROP_DIAMOND_SWORD",

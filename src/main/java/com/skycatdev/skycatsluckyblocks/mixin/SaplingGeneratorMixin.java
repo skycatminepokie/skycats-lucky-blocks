@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 import java.util.Map;
 
 @Mixin(SaplingGenerator.class)
-public interface SaplingGeneratorMixin { // TODO: Test with connector
+public interface SaplingGeneratorMixin {
     @Accessor
     static Map<String, SaplingGenerator> getGENERATORS() {
         throw new AssertionError("Mixin does the work here");

@@ -49,7 +49,7 @@ public class SkycatsLuckyBlocksEnglishLangProvider extends FabricLanguageProvide
         addText("effect.spawn_wither.log", "Spawned a wither", tb);
         addText("effect.spawn_wither.failed", "Couldn't spawn a wither for spawn_wither effect", tb);
         addText("effect.spawn_bob.bob", "Bob", tb);
-
+        tb.add("itemGroup." + SkycatsLuckyBlocks.MOD_ID + ".lucky_blocks", "Lucky Blocks");
     }
 
     public void addText(String path, String text, TranslationBuilder tb) {

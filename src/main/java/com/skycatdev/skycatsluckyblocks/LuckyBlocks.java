@@ -27,7 +27,7 @@ public class LuckyBlocks {
             LuckyEffectPools.WEAPON), "weapon_lucky_block", true);
     public static final ItemGroup LUCKY_BLOCKS_ITEM_GROUP = FabricItemGroup.builder()
             .icon(() -> new ItemStack(LUCKY_BLOCK.asItem()))
-            .displayName(Text.of("Lucky Blocks")) // TODO: Localize
+            .displayName(Text.translatable("itemGroup." + SkycatsLuckyBlocks.MOD_ID + ".lucky_blocks"))
             .build();
 
     public static void init() {

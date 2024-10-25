@@ -128,7 +128,7 @@ public class LuckyEffects { // TODO: Move adding pools to LuckyPools
                         new BlockBox(chunk.getStartX(), world.getBottomY(), chunk.getStartZ(), chunk.getEndX(), world.getTopY(), chunk.getEndZ()),
                         chunk)
         );
-        player.sendMessage(Text.translatable(MOD_ID + ".effect.place_structure.notification")); // TODO: Localize
+        player.sendMessage(Text.translatable(MOD_ID + ".effect.place_structure.notification"));
         return true;
     })
             .addPool(LuckyEffectPools.DEFAULT, 0.1)
