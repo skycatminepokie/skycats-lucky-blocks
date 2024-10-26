@@ -406,6 +406,9 @@ public class LuckyEffects { // TODO: Move adding pools to LuckyPools
     })
             .addPool(LuckyEffectPools.DEFAULT, 1)
             .build();
+    @SuppressWarnings("unused") public static final SimpleLuckyEffect PLACE_MELON_CUBE = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "place_melon_cube"), (world, pos, state, player) -> placeStructure(world, pos.north().west(), pos.north().west(), player, Identifier.of(MOD_ID, "melon_cube"), false))
+            .addPool(LuckyEffectPools.DEFAULT, 1)
+            .build();
 
     private static void placeSignFacingPlayer(ServerWorld world, BlockPos pos, ServerPlayerEntity player, SignText text) {
         world.setBlockState(pos,
