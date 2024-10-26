@@ -20,6 +20,7 @@ import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.boss.WitherEntity;
 import net.minecraft.entity.mob.CreeperEntity;
+import net.minecraft.entity.mob.WardenEntity;
 import net.minecraft.entity.mob.ZombieEntity;
 import net.minecraft.entity.passive.BatEntity;
 import net.minecraft.entity.passive.IronGolemEntity;
@@ -381,6 +382,47 @@ public class LuckyEffects { // TODO: Move adding pools to LuckyPools
     })
             .addPool(LuckyEffectPools.DEFAULT, 1)
             .build();
+    @SuppressWarnings("unused") public static final SimpleLuckyEffect SPAWN_WARDEN_WITH_WARNING = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "spawn_warden_with_warning"), (world, pos, state, player) -> {
+        placeSignFacingPlayer(world, pos, player, new SignText().withMessage(1, Text.of("run.")));
+        if (world.getBlockEntity(pos) instanceof SignBlockEntity sign) {
+            ServerTimerAccess timerAccess = (ServerTimerAccess) world.getServer();
+            for (int i = 10; i >= 0; i--) {
+                int countdown = i;
+                timerAccess.skycats_lucky_blocks$addTimer(20L * (10 - i), () -> { // Two seconds to read "run", then count down.
+                    changeSignText(world, new SignText().withMessage(1, Text.of(String.valueOf(countdown))), sign, true);
+                    world.playSound(null, pos, SoundEvents.BLOCK_LEVER_CLICK, SoundCategory.BLOCKS, 1.0f, 1.0f);
+                });
+            }
+            timerAccess.skycats_lucky_blocks$addTimer(240L, () -> {
+                changeSignText(world, new SignText().withMessage(1, Text.of("run.")), sign, true);
+                Optional<WardenEntity> optWarden = LargeEntitySpawnHelper.trySpawnAt(EntityType.WARDEN, SpawnReason.COMMAND, world, pos, 10, 10, 5, LargeEntitySpawnHelper.Requirements.WARDEN);
+                optWarden.ifPresent(wardenEntity -> wardenEntity.playSound(SoundEvents.ENTITY_WARDEN_EMERGE));
+            });
+            return true;
+        } else {
+            // TODO: Warn that it failed
+            return false;
+        }
+    })
+            .addPool(LuckyEffectPools.DEFAULT, 1)
+            .build();
+
+    private static void placeSignFacingPlayer(ServerWorld world, BlockPos pos, ServerPlayerEntity player, SignText text) {
+        world.setBlockState(pos,
+                Blocks.OAK_SIGN.getDefaultState().rotate(rotationFromNorth(player.getHorizontalFacing()))
+                        .with(Properties.ROTATION, RotationPropertyHelper.fromYaw(player.getYaw() + 180)));
+        BlockEntity blockEntity = world.getBlockEntity(pos);
+        if (blockEntity instanceof SignBlockEntity signBlockEntity) {
+            changeSignText(world, text, signBlockEntity, true);
+        } else {
+            LOGGER.warn("Couldn't change sign text at {}", pos);
+        }
+    }
+
+    private static void changeSignText(ServerWorld world, SignText text, SignBlockEntity signBlockEntity, boolean front) {
+        signBlockEntity.changeText(original -> text, front);
+        world.updateListeners(signBlockEntity.getPos(), signBlockEntity.getCachedState(), signBlockEntity.getCachedState(), Block.NOTIFY_ALL);
+    }
 
     private static void dropItemStack(ItemStack itemStack, BlockPos pos, ServerWorld world) {
         ItemScatterer.spawn(world, pos.getX(), pos.getY(), pos.getZ(), itemStack);
@@ -457,16 +499,7 @@ public class LuckyEffects { // TODO: Move adding pools to LuckyPools
         boolean success = placeStructure(world, structurePos, structurePos, player, Identifier.of(MOD_ID, "lava_cage"), true);
         if (success) {
             BlockPos signPos = structurePos.up().offset(player.getHorizontalFacing().rotateYClockwise(), 1);
-            world.setBlockState(signPos,
-                    Blocks.OAK_SIGN.getDefaultState().rotate(rotationFromNorth(player.getHorizontalFacing()))
-                            .with(Properties.ROTATION, RotationPropertyHelper.fromYaw(player.getYaw() + 180)));
-            BlockEntity blockEntity = world.getBlockEntity(signPos);
-            if (blockEntity instanceof SignBlockEntity signBlockEntity) {
-                signBlockEntity.changeText(text -> new SignText().withMessage(1, Text.translatable(MOD_ID + ".place_lava_cage.sign")), true);
-                world.updateListeners(signBlockEntity.getPos(), signBlockEntity.getCachedState(), signBlockEntity.getCachedState(), Block.NOTIFY_ALL);
-            } else {
-                LOGGER.warn(Text.translatable(MOD_ID + ".place_lava_cage.failed_set_text").getString());
-            }
+            placeSignFacingPlayer(world, signPos, player, new SignText().withMessage(1, Text.translatable(MOD_ID + ".place_lava_cage.sign")));
         }
         return success;
     }

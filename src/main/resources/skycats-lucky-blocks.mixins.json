@@ -5,6 +5,7 @@
   "mixins": [
     "LlamaSpitEntityMixin",
     "SaplingGeneratorMixin",
+    "ServerTimer",
     "SlimeEntityMixin"
   ],
   "injectors": {
