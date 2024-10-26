@@ -15,6 +15,7 @@
   "skycats-lucky-blocks.effect.spawn_bob.bob": "Bob",
   "skycats-lucky-blocks.effect.spawn_iron_golem.failed": "Couldn't spawn a golem for spawn_iron_golem effect",
   "skycats-lucky-blocks.effect.spawn_wandering_caravan_with_super_llamas.llama_name": "Super %s",
+  "skycats-lucky-blocks.effect.spawn_warden_with_warning.run": "run.",
   "skycats-lucky-blocks.effect.spawn_wither.failed": "Couldn't spawn a wither for spawn_wither effect",
   "skycats-lucky-blocks.effect.spawn_wither.log": "Spawned a wither",
   "skycats-lucky-blocks.effect.spawn_wither.name": "Flying Warden that can See",

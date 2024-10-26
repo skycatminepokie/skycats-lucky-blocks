@@ -383,7 +383,7 @@ public class LuckyEffects { // TODO: Move adding pools to LuckyPools
             .addPool(LuckyEffectPools.DEFAULT, 1)
             .build();
     @SuppressWarnings("unused") public static final SimpleLuckyEffect SPAWN_WARDEN_WITH_WARNING = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "spawn_warden_with_warning"), (world, pos, state, player) -> {
-        placeSignFacingPlayer(world, pos, player, new SignText().withMessage(1, Text.of("run.")));
+        placeSignFacingPlayer(world, pos, player, new SignText().withMessage(1, Text.translatable(SkycatsLuckyBlocks.MOD_ID + ".effect.spawn_warden_with_warning.run")));
         if (world.getBlockEntity(pos) instanceof SignBlockEntity sign) {
             ServerTimerAccess timerAccess = (ServerTimerAccess) world.getServer();
             for (int i = 10; i >= 0; i--) {
@@ -394,13 +394,13 @@ public class LuckyEffects { // TODO: Move adding pools to LuckyPools
                 });
             }
             timerAccess.skycats_lucky_blocks$addTimer(240L, () -> {
-                changeSignText(world, new SignText().withMessage(1, Text.of("run.")), sign, true);
+                changeSignText(world, new SignText().withMessage(1, Text.translatable(SkycatsLuckyBlocks.MOD_ID + ".effect.spawn_warden_with_warning.run")), sign, true);
                 Optional<WardenEntity> optWarden = LargeEntitySpawnHelper.trySpawnAt(EntityType.WARDEN, SpawnReason.COMMAND, world, pos, 10, 10, 5, LargeEntitySpawnHelper.Requirements.WARDEN);
                 optWarden.ifPresent(wardenEntity -> wardenEntity.playSound(SoundEvents.ENTITY_WARDEN_EMERGE));
             });
             return true;
         } else {
-            // TODO: Warn that it failed
+            LOGGER.warn("Couldn't find a sign to put text on during SPAWN_WARDEN_WITH_WARNING");
             return false;
         }
     })
