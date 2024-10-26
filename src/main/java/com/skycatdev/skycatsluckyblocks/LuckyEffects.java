@@ -78,12 +78,12 @@ public class LuckyEffects { // TODO: Move adding pools to LuckyPools
     })
             .addPool(LuckyEffectPools.DEFAULT, 0.3)
             .build();
-    @SuppressWarnings("unused") public static final SimpleLuckyEffect RANDOM_TREE = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "random_tree"), ((world, pos, state, player) -> {
+    @SuppressWarnings("unused") public static final SimpleLuckyEffect RANDOM_TREE = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "random_tree"), (world, pos, state, player) -> {
         pos = pos.up();
         SaplingGenerator[] generators = SaplingGeneratorMixin.getGENERATORS().values().toArray(new SaplingGenerator[0]);
         Random random = player.getRandom();
         return generators[random.nextInt(generators.length)].generate(world, world.getChunkManager().getChunkGenerator(), pos, state, random);
-    }))
+    })
             .addPool(LuckyEffectPools.DEFAULT, 1)
             .build();
     @SuppressWarnings("unused") public static final SimpleLuckyEffect PLACE_STRUCTURE = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "place_structure"), (world, pos, state, player) -> {
@@ -174,7 +174,7 @@ public class LuckyEffects { // TODO: Move adding pools to LuckyPools
             .addPool(LuckyEffectPools.WEAPON, 1)
             .addPool(LuckyEffectPools.DEFAULT, 1)
             .build();
-    @SuppressWarnings("unused") public static final SimpleLuckyEffect DROP_WOOD_SWORD = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "drop_wood_sword"), ((world, pos, state, player) -> {
+    @SuppressWarnings("unused") public static final SimpleLuckyEffect DROP_WOOD_SWORD = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "drop_wood_sword"), (world, pos, state, player) -> {
         ItemStack wood_sword = new ItemStack(Items.WOODEN_SWORD);
         ItemEnchantmentsComponent.Builder builder = new ItemEnchantmentsComponent.Builder(ItemEnchantmentsComponent.DEFAULT);
         Optional<RegistryEntry.Reference<Enchantment>> optSharpness = world.getRegistryManager().get(RegistryKeys.ENCHANTMENT).getEntry(Enchantments.SHARPNESS);
@@ -186,11 +186,11 @@ public class LuckyEffects { // TODO: Move adding pools to LuckyPools
         wood_sword.set(DataComponentTypes.ENCHANTMENTS,
                 builder.build());
         return world.spawnEntity(new ItemEntity(world, pos.getX(), pos.getY(), pos.getZ(), wood_sword));
-    }))
+    })
             .addPool(LuckyEffectPools.WEAPON, 3)
             .addPool(LuckyEffectPools.DEFAULT, 0.1)
             .build();
-    @SuppressWarnings("unused") public static final SimpleLuckyEffect DROP_DIAMOND_SWORD = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "drop_diamond_sword"), ((world, pos, state, player) -> {
+    @SuppressWarnings("unused") public static final SimpleLuckyEffect DROP_DIAMOND_SWORD = new SimpleLuckyEffect.Builder(Identifier.of(MOD_ID, "drop_diamond_sword"), (world, pos, state, player) -> {
         ItemStack diamond_sword = new ItemStack(Items.DIAMOND_SWORD);
         ItemEnchantmentsComponent.Builder builder = new ItemEnchantmentsComponent.Builder(ItemEnchantmentsComponent.DEFAULT);
         Optional<RegistryEntry.Reference<Enchantment>> optSilkTouch = world.getRegistryManager().get(RegistryKeys.ENCHANTMENT).getEntry(Enchantments.SILK_TOUCH);
@@ -204,7 +204,7 @@ public class LuckyEffects { // TODO: Move adding pools to LuckyPools
         diamond_sword.set(DataComponentTypes.ENCHANTMENTS,
                 builder.build());
         return world.spawnEntity(new ItemEntity(world, pos.getX(), pos.getY(), pos.getZ(), diamond_sword));
-    }))
+    })
             .addPool(LuckyEffectPools.WEAPON, 30)
             .addPool(LuckyEffectPools.DEFAULT, 1)
             .build();
