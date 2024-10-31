@@ -2,6 +2,7 @@ package com.skycatdev.skycatsluckyblocks.api;
 
 import com.skycatdev.skycatsluckyblocks.SkycatsLuckyBlocks;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
@@ -43,7 +44,9 @@ public abstract class AbstractLuckyBlock extends Block implements PlayerBlockBre
                     // This is just a compact way of trying effects over and over again if they fail.
                     int attempts = 0;
                     while (!effect.execute(serverWorld, pos, state, serverPlayer) && attempts++ < MAX_ATTEMPTS) {
-                        SkycatsLuckyBlocks.LOGGER.info("Failed a LuckyEffect, trying again."); // TODO: Only dev env
+                        if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
+                            SkycatsLuckyBlocks.LOGGER.info("Failed a LuckyEffect, trying again.");
+                        }
                         effect = getEffectPool().getRandom(random);
                         if (effect == null) {
                             SkycatsLuckyBlocks.LOGGER.warn("Effect pool for {} was empty, and it wasn't before. You've messed something up royally.", getName().getString());
