@@ -1,5 +1,7 @@
 {
   "block.skycats-lucky-blocks.lucky_block": "Lucky Block",
+  "block.skycats-lucky-blocks.weapon_lucky_block": "Weapon Lucky Block",
+  "block.skycats-lucky-blocks.wither_lucky_block": "Wither Lucky Block",
   "itemGroup.skycats-lucky-blocks.lucky_blocks": "Lucky Blocks",
   "skycats-lucky-blocks.effect.drop_diamond.name": "Not a diamund",
   "skycats-lucky-blocks.effect.drop_diamond_sword.name": "Garbage",

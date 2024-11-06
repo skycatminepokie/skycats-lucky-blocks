@@ -16,6 +16,8 @@ public class SkycatsLuckyBlocksEnglishLangProvider extends FabricLanguageProvide
     @Override
     public void generateTranslations(RegistryWrapper.WrapperLookup registryLookup, TranslationBuilder tb) {
         tb.add(LuckyBlocks.LUCKY_BLOCK, "Lucky Block"); // Also does item apparently
+        tb.add(LuckyBlocks.WEAPON_BLOCK, "Weapon Lucky Block");
+        tb.add(LuckyBlocks.WITHER_BLOCK, "Wither Lucky Block");
         addText("effect.say_hi.hi", "[%s] Hi", tb);
         addText("effect.drop_diamond.name", "Not a diamund", tb);
         addText("effect.drop_kb_stick.no_kb", "Knockback enchantment didn't exist? Skipping DROP_KB_STICK." , tb);
